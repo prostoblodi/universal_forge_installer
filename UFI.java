@@ -13,6 +13,7 @@ import javafx.util.StringConverter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class UFI extends Application {
     private final ChoiceBox<Pair<String, String>> chooseMinecraftVersion = new ChoiceBox<>();
@@ -21,28 +22,15 @@ public class UFI extends Application {
     private static Pair<String, String> minecraftVersion = new Pair<>("minecraft version 1", "m1");
     private static Pair<String, String> forgeVersion = new Pair<>("forge version 1", "f1");
 
+    private final Label mainLabel = new Label("Universal Forge Installer");
+    private final Label minecraftVersionLabel = new Label("Minecraft version: ");
+    private final Label forgeVersionLabel = new Label("Forge version: ");
+
+    private final Button downloadButton = new Button("Download");
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        Label label = new Label("Universal Forge Installer");
-        label.setPrefWidth(200);
-        label.setAlignment(Pos.CENTER);
-        label.setStyle("-fx-font-size: 16px; -fx-text-fill: #73648A;");
-
-        Label minecraftVersionLabel = new Label("Minecraft version: ");
-        minecraftVersionLabel.setStyle("-fx-text-fill: #73648A;");
-
-        chooseMinecraftVersion.setPrefWidth(200);
-        chooseMinecraftVersion.setStyle("-fx-background-color: #453750; -fx-text-fill: #73648A;");
-
-        Label forgeVersionLabel = new Label("Forge version: ");
-        forgeVersionLabel.setStyle("-fx-text-fill: #73648A;");
-
-        chooseForgeVersion.setPrefWidth(200);
-        chooseForgeVersion.setStyle("-fx-background-color: #453750; -fx-text-fill: #73648A;");
-
-        Button downloadButton = new Button("Download");
-        downloadButton.setStyle("-fx-background-color: #453750; -fx-text-fill: #73648A;");
+        setLBStyles();
 
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
@@ -52,29 +40,49 @@ public class UFI extends Application {
         gp.setHgap(10);
         gp.setVgap(10);
 
-        VBox vbox = new VBox(label, gp, downloadButton);
-        vbox.setSpacing(10.0d);
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setPadding(new Insets(40));
-        vbox.setStyle("-fx-background-color: #0C0910;");
+        VBox vbox = new VBox(mainLabel, gp, downloadButton);
+        vbox.getStyleClass().add("vbox");
 
         Scene scene = new Scene(vbox);
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles.css")).toExternalForm());
 
         showMinecraftVersions();
         showForgeVersions();
 
-        downloadButton.setOnAction(
-                (_) -> saveVersions()
-        );
+        setActions();
 
         primaryStage.setTitle("Universal Forge Installer");
         primaryStage.setScene(scene);
         primaryStage.show();
     }
 
-    private void saveVersions() {
+    private void setLBStyles(){ // LB означает Labels and Buttons
+        mainLabel.getStyleClass().add("label-main");
+        minecraftVersionLabel.getStyleClass().add("label");
+        forgeVersionLabel.getStyleClass().add("label");
+        downloadButton.getStyleClass().add("button");
+    }
+
+    private void setActions(){
+        chooseMinecraftVersion.setOnAction(
+                (_) -> saveMinecraftVersion()
+        );
+
+        chooseForgeVersion.setOnAction(
+                (_) -> saveForgeVersion()
+        );
+
+        downloadButton.setOnAction(
+                (_) -> System.out.println("Downloaded!") // действия для загрузки
+        );
+    }
+
+    private void saveMinecraftVersion() {
         minecraftVersion = chooseMinecraftVersion.getValue();
         System.out.println("Saved minecraft version as: " + chooseMinecraftVersion.getValue());
+    }
+
+    private void saveForgeVersion() {
         forgeVersion = chooseForgeVersion.getValue();
         System.out.println("Saved forge version as: " + chooseForgeVersion.getValue());
     }
@@ -101,6 +109,9 @@ public class UFI extends Application {
         chooseMinecraftVersion.getItems().addAll(assetClasses);
         System.out.println(chooseMinecraftVersion.getItems());
         chooseMinecraftVersion.setValue(minecraftVersion);
+
+        chooseMinecraftVersion.setSkin(new CustomChoiceBoxSkin<>(chooseMinecraftVersion));
+
     }
 
     private void showForgeVersions() {
@@ -124,6 +135,8 @@ public class UFI extends Application {
         chooseForgeVersion.getItems().add(forgeVersion);
         chooseForgeVersion.getItems().addAll(assetClasses);
         chooseForgeVersion.setValue(forgeVersion);
+
+        chooseForgeVersion.setSkin(new CustomChoiceBoxSkin<>(chooseForgeVersion));
     }
 
     public static void main(String[] args) {

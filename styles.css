@@ -1,0 +1,55 @@
+/* VBox */
+.vbox {
+    -fx-spacing: 10.0;
+    -fx-alignment: center;
+    -fx-padding: 40;
+    -fx-background-color: #242424;
+}
+
+/* Labels */
+.label-main {
+    -fx-pref-width: 200;
+    -fx-alignment: center;
+    -fx-font-size: 16px;
+    -fx-text-fill: #F0F0F0;
+}
+
+.label {
+    -fx-text-fill: #F0F0F0;
+}
+
+/* Buttons */
+.button {
+    -fx-alignment: center;
+    -fx-background-color: #383838;
+    -fx-text-fill: #F0F0F0;
+    -fx-font-size: 14px;
+}
+
+/* Основной стиль для ChoiceBox */
+.choice-box {
+    -fx-background-color: #333333;  /* Тёмный фон */
+    -fx-text-fill: #D3D3D3;  /* Светлый текст */
+    -fx-font-size: 14px;
+    -fx-border-width: 0;  /* Без рамки */
+}
+
+/* Стиль для выпадающего списка (когда список открыт) */
+.choice-box-popup {
+    -fx-background-color: #444444;  /* Темный фон для элементов списка */
+    -fx-text-fill: #D3D3D3;  /* Светлый текст в элементах */
+    -fx-font-size: 14px;
+    -fx-padding: 5px;
+}
+
+/* Стиль при наведении на элементы (такой эффект приятен) */
+.choice-box-popup :hover {
+    -fx-background-color: #5a5a5a;  /* Немного светлее при наведении */
+    -fx-text-fill: #ffffff;  /* Белый текст при наведении */
+}
+
+/* Стиль для выбранного элемента */
+.choice-box-popup :selected {
+    -fx-background-color: #666666;  /* Светлый фон для выбранного элемента */
+    -fx-text-fill: #ffffff;  /* Белый текст для выбранного */
+}
