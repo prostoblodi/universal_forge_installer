@@ -1,9 +1,7 @@
 import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -16,8 +14,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class UFI extends Application {
-    private final ChoiceBox<Pair<String, String>> chooseMinecraftVersion = new ChoiceBox<>();
-    private final ChoiceBox<Pair<String, String>> chooseForgeVersion = new ChoiceBox<>();
+    private final ComboBox<Pair<String, String>> chooseMinecraftVersion = new ComboBox<>();
+    private final ComboBox<Pair<String, String>> chooseForgeVersion = new ComboBox<>();
 
     private static Pair<String, String> minecraftVersion = new Pair<>("minecraft version 1", "m1");
     private static Pair<String, String> forgeVersion = new Pair<>("forge version 1", "f1");
@@ -109,9 +107,6 @@ public class UFI extends Application {
         chooseMinecraftVersion.getItems().addAll(assetClasses);
         System.out.println(chooseMinecraftVersion.getItems());
         chooseMinecraftVersion.setValue(minecraftVersion);
-
-        chooseMinecraftVersion.setSkin(new CustomChoiceBoxSkin<>(chooseMinecraftVersion));
-
     }
 
     private void showForgeVersions() {
@@ -135,8 +130,6 @@ public class UFI extends Application {
         chooseForgeVersion.getItems().add(forgeVersion);
         chooseForgeVersion.getItems().addAll(assetClasses);
         chooseForgeVersion.setValue(forgeVersion);
-
-        chooseForgeVersion.setSkin(new CustomChoiceBoxSkin<>(chooseForgeVersion));
     }
 
     public static void main(String[] args) {
