@@ -1,94 +1,96 @@
+/* Window style */
 .vbox {
-    -fx-spacing: 10.0;
-    -fx-alignment: center;
-    -fx-padding: 40;
-    -fx-background-color: #242424;
+    -fx-spacing: 10.0; /* Distance between objects */
+    -fx-alignment: center; /* Objects alignment */
+    -fx-padding: 40; /* Distance between objects and window border */
+    -fx-background-color: #242424; /* Window background colour */
 }
 
+/* Universal Forge Installer style */
 .label-main {
-    -fx-pref-width: 200;
-    -fx-alignment: center;
-    -fx-font-size: 16px;
-    -fx-text-fill: #F0F0F0;
+    -fx-pref-width: 200; /* Preferred width */
+    -fx-alignment: center; /* Positioning the text relative to the window */
+    -fx-font-size: 16px; /* Size of font */
+    -fx-text-fill: #F0F0F0; /* Text colour */
 }
 
+/* Minecraft and Forge versions text style */
 .label {
-    -fx-text-fill: #F0F0F0;
+    -fx-text-fill: #F0F0F0; /* Text colour */
 }
 
+/* Download button style */
 .button {
-    -fx-alignment: center;
-    -fx-background-color: #383838;
-    -fx-text-fill: #F0F0F0;
-    -fx-font-size: 14px;
+    -fx-alignment: center; /* Positioning the text relative to the window */
+    -fx-background-color: #383838; /* Button colour */
+    -fx-text-fill: #F0F0F0; /* Text colour */
+    -fx-font-size: 14px; /* Font size */
 }
 
-
+/* Versions choose box style */
 .combo-box {
-    -fx-background-color: #383838;
-    -fx-text-fill: #F0F0F0;
-    -fx-font-size: 14px;
+    -fx-background-color: #383838; /* Box colour */
 }
 
+/* Versions choose box style */
 .combo-box .list-cell {
-    -fx-background-color: #383838;
-    -fx-text-fill: #d0d0d0;
-    -fx-background-radius: 5px;
+    -fx-background-color: #383838; /* Box colour */
+    -fx-text-fill: #d0d0d0; /* Text in box colour */
+    -fx-background-radius: 5px; /* Rounding radius of the box */
 }
 
-.combo-box-popup {
-    -fx-background-color: #3c3c3c;
-    -fx-text-fill: #d0d0d0;
-    -fx-font-size: 14px;
-    -fx-background-radius: 5px;
-}
-
+/* The style of the list that drops down after clicking on the box */
 .combo-box .list-view {
-    -fx-background-color: #3c3c3c;
-    -fx-text-fill: #d0d0d0;
-    -fx-padding: 5px;
-    -fx-border-width: 0px;
+    -fx-background-color: #3c3c3c; /* List colour */
 }
 
+/* Default cell style in list */
 .combo-box .list-view .list-cell {
-    -fx-background-color: #3c3c3c;
-    -fx-text-fill: #d0d0d0;
-    -fx-padding: 5px;
+    -fx-background-color: #3c3c3c; /* Cell colour */
+    -fx-text-fill: #d0d0d0; /* Cell text colour */
 }
 
+/* Cell color in list when hovering */
 .combo-box .list-view .list-cell:hover {
-    -fx-background-color: #4a4a4a;
-    -fx-text-fill: #ffffff;
-    -fx-background-radius: 5px;
+    -fx-background-color: #4a4a4a; /* Cell colour */
+    -fx-text-fill: #ffffff; /* Cell text colour */
+    -fx-background-radius: 5px; /* Rounding radius of the cell */
 }
 
+/* Cell color in list when clicked */
 .combo-box .list-view .list-cell:selected {
-    -fx-background-color: #5a5a5a;
-    -fx-text-fill: #ffffff;
-    -fx-background-radius: 5px;
+    -fx-background-color: #5a5a5a; /* Cell colour */
+    -fx-text-fill: #ffffff; /* Cell text colour */
+    -fx-background-radius: 5px; /* Rounding radius of the cell */
 }
+
+/* Scroll bar style */
 .combo-box-popup .scroll-bar:vertical{
-     -fx-background-color: #383838;
-     -fx-background-radius: 5px;
+     -fx-background-color: #383838; /* Scroll bar colour */
+     -fx-background-radius: 5px; /* Rounding radius of the scroll bar */
 }
 
+/* Scroll bar thumb style */
 .combo-box-popup .scroll-bar:vertical .thumb {
-    -fx-background-color: #4a4a4a;
-    -fx-background-radius: 5px;
+    -fx-background-color: #4a4a4a; /* Thumb colour */
+    -fx-background-radius: 5px; /* Rounding radius of the thumb */
 }
 
+/* The style of the arena that thumb is rolling around in */
 .combo-box-popup .scroll-bar:vertical .track {
-    -fx-background-color: #383838;
-    -fx-background-radius: 5px;
+    -fx-background-color: #383838; /* Area colour */
+    -fx-background-radius: 5px; /* Rounding radius of the area */
 }
 
+/* The style of buttons with arrows */
 .combo-box-popup .scroll-bar:vertical .increment-button,
 .combo-box-popup .scroll-bar:vertical .decrement-button {
-    -fx-background-color: #383838;
+    -fx-background-color: #383838; /* Button colour */
 }
 
+/* The style of arrows in buttons */
 .combo-box-popup .scroll-bar:vertical .increment-arrow,
 .combo-box-popup .scroll-bar:vertical .decrement-arrow {
-    -fx-background-color: #4a4a4a;
+    -fx-background-color: #4a4a4a; /* Arrow colour */
 }
 

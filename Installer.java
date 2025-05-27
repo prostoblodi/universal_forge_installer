@@ -59,18 +59,12 @@ public class Installer {
             throw new IOException("Ошибка при загрузке Forge с URL: " + url, e);
         }
 
-        try {
-            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", String.format("Forge %s(%s).jar", forgeVersion, minecraftVersion));
-            processBuilder.directory(new java.io.File(System.getProperty("user.dir")));
-            processBuilder.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        Runtime.getRuntime().exec(String.format("/usr/lib/jvm/java-24-openjdk/bin/java -jar -Ddebug=true 'Forge %s (%s).jar'", forgeVersion, minecraftVersion));
     }
 
 //    public static void main(String[] args) throws IOException {
-////        System.out.println(getForgeVersionsForMinecraft("1.21.1"));
-////        System.out.println(getMinecraftVersionsForForge());
-////        download_forge("1.17.1","37.1.1");
+// //        System.out.println(getForgeVersionsForMinecraft("1.21.1"));
+// //        System.out.println(getMinecraftVersionsForForge());
+// //        download_forge("1.17.1","37.1.1");
 //    }
 }
