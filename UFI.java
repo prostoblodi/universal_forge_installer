@@ -132,7 +132,7 @@ public class UFI extends Application {
 
     private List<Pair<String, String>> getMinecraftVersions() throws IOException {
         List<Pair<String, String>> assetClasses = new ArrayList<>();
-        List<String> versions = Fetcher.getForgeVersionsForMinecraft();
+        List<String> versions = Fetcher.getMinecraftVersionsForForge();
         for(String version : versions){
             assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
         }
