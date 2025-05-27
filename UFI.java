@@ -55,7 +55,7 @@ public class UFI extends Application {
         primaryStage.show();
     }
 
-    private void setLBStyles(){ // LB означает Labels and Buttons
+    private void setLBStyles(){ // LB means Labels and Buttons
         mainLabel.getStyleClass().add("label-main");
         minecraftVersionLabel.getStyleClass().add("label");
         forgeVersionLabel.getStyleClass().add("label");
@@ -134,7 +134,7 @@ public class UFI extends Application {
 
     private List<Pair<String, String>> getMinecraftVersions() throws IOException {
         List<Pair<String, String>> assetClasses = new ArrayList<>();
-        List<String> versions = Fetcher.getMinecraftVersionsForForge();
+        List<String> versions = Installer.getMinecraftVersionsForForge();
         for(String version : versions){
             assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
         }
@@ -143,7 +143,7 @@ public class UFI extends Application {
 
     private List<Pair<String, String>> getForgeVersions() throws IOException {
         List<Pair<String, String>> assetClasses = new ArrayList<>();
-        List<String> versions = Fetcher.getForgeVersionsForMinecraft(minecraftVersion.getKey());
+        List<String> versions = Installer.getForgeVersionsForMinecraft(minecraftVersion.getKey());
         for(String version : versions){
             assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
         }

@@ -6,7 +6,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class Fetcher {
+public class Installer {
+
+    // method, that returns all versions of minecraft, for which forge is available
     public static List<String> getMinecraftVersionsForForge() throws IOException {
         List<String> versions = new ArrayList<>();
         Document document = Jsoup.connect("https://files.minecraftforge.net/net/minecraftforge/forge/").get();
@@ -20,6 +22,7 @@ public class Fetcher {
         return versions;
     }
 
+    // method, that returns all versions of forge, available for the entered version of minecraft
     public static List<String> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
         List<String> versions = new ArrayList<>();
         if (Objects.equals(minecraftVersion, "")) {
