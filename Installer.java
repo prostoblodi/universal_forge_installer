@@ -1,4 +1,9 @@
 import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import org.jsoup.Jsoup;
@@ -39,8 +44,33 @@ public class Installer {
         return versions;
     }
 
+    public static void install_forge(String minecraftVersion, String forgeVersion) throws IOException {
+        String fileName = String.format("Forge %s(%s).jar", forgeVersion, minecraftVersion);
+        Path filePath = Paths.get(System.getProperty("user.dir"), fileName);
+
+        URL url = new URL(String.format("https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar", minecraftVersion, forgeVersion, minecraftVersion, forgeVersion));
+
+        System.out.println("Скачивание файла..");
+
+        try (InputStream inputStream = url.openStream()) {
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Forge успешно загружен в: " + filePath.toAbsolutePath());
+        } catch (IOException e) {
+            throw new IOException("Ошибка при загрузке Forge с URL: " + url, e);
+        }
+
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("java", "-jar", String.format("Forge %s(%s).jar", forgeVersion, minecraftVersion));
+            processBuilder.directory(new java.io.File(System.getProperty("user.dir")));
+            processBuilder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 //    public static void main(String[] args) throws IOException {
-//        System.out.println(getForgeVersionsForMinecraft("1.21.1"));
-//        System.out.println(getMinecraftVersionsForForge());
+////        System.out.println(getForgeVersionsForMinecraft("1.21.1"));
+////        System.out.println(getMinecraftVersionsForForge());
+////        download_forge("1.17.1","37.1.1");
 //    }
 }

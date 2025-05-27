@@ -78,7 +78,13 @@ public class UFI extends Application {
         );
 
         downloadButton.setOnAction(
-                (_) -> System.out.println("Downloaded!") // действия для загрузки
+                (_) -> {
+                    try {
+                        Installer.install_forge(minecraftVersion.getKey(), forgeVersion.getKey());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                } // действия для загрузки
         );
     }
 
