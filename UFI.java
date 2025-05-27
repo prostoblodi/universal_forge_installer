@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import javafx.util.StringConverter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +18,7 @@ public class UFI extends Application {
     private final ComboBox<Pair<String, String>> chooseMinecraftVersion = new ComboBox<>();
     private final ComboBox<Pair<String, String>> chooseForgeVersion = new ComboBox<>();
 
-    private static Pair<String, String> minecraftVersion = new Pair<>("minecraft version 1", "m1");
+    private static Pair<String, String> minecraftVersion = new Pair<>("Default Minecraft Version", "default");;
     private static Pair<String, String> forgeVersion = new Pair<>("forge version 1", "f1");
 
     private final Label mainLabel = new Label("Universal Forge Installer");
@@ -85,11 +86,8 @@ public class UFI extends Application {
         System.out.println("Saved forge version as: " + chooseForgeVersion.getValue());
     }
 
-    private void showMinecraftVersions() {
-        List<Pair<String, String>> assetClasses = new ArrayList<>();
-        assetClasses.add(new Pair<>("minecraft version 2", "m2"));
-        assetClasses.add(new Pair<>("minecraft version 3", "m3"));
-        assetClasses.add(new Pair<>("minecraft version 4", "m4"));
+    private void showMinecraftVersions() throws IOException {
+        List<Pair<String, String>> assetClasses = getMinecraftVersions();
 
         chooseMinecraftVersion.setConverter(new StringConverter<>() {
             @Override
@@ -130,6 +128,15 @@ public class UFI extends Application {
         chooseForgeVersion.getItems().add(forgeVersion);
         chooseForgeVersion.getItems().addAll(assetClasses);
         chooseForgeVersion.setValue(forgeVersion);
+    }
+
+    private List<Pair<String, String>> getMinecraftVersions() throws IOException {
+        List<Pair<String, String>> assetClasses = new ArrayList<>();
+        List<String> versions = Fetcher.getMinecraftVersions();
+        for(String version : versions){
+            assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
+        }
+        return assetClasses;
     }
 
     public static void main(String[] args) {
