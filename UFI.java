@@ -18,8 +18,8 @@ public class UFI extends Application {
     private final ComboBox<Pair<String, String>> chooseMinecraftVersion = new ComboBox<>();
     private final ComboBox<Pair<String, String>> chooseForgeVersion = new ComboBox<>();
 
-    private static Pair<String, String> minecraftVersion = new Pair<>("Default Minecraft Version", "default");;
-    private static Pair<String, String> forgeVersion = new Pair<>("forge version 1", "f1");
+    private static Pair<String, String> minecraftVersion = new Pair<>("", "");
+    private static Pair<String, String> forgeVersion = new Pair<>("", "");
 
     private final Label mainLabel = new Label("Universal Forge Installer");
     private final Label minecraftVersionLabel = new Label("Minecraft version: ");
@@ -46,7 +46,7 @@ public class UFI extends Application {
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles.css")).toExternalForm());
 
         showMinecraftVersions();
-        showForgeVersions();
+        updateForgeVersions();
 
         setActions();
 
@@ -64,7 +64,13 @@ public class UFI extends Application {
 
     private void setActions(){
         chooseMinecraftVersion.setOnAction(
-                (_) -> saveMinecraftVersion()
+                (_) -> {
+                    try {
+                        saveMinecraftVersion();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
         );
 
         chooseForgeVersion.setOnAction(
@@ -76,14 +82,15 @@ public class UFI extends Application {
         );
     }
 
-    private void saveMinecraftVersion() {
+    private void saveMinecraftVersion() throws IOException{
         minecraftVersion = chooseMinecraftVersion.getValue();
-        System.out.println("Saved minecraft version as: " + chooseMinecraftVersion.getValue());
+        updateForgeVersions();
+        System.out.println("Saved minecraft version as: " + minecraftVersion);
     }
 
     private void saveForgeVersion() {
         forgeVersion = chooseForgeVersion.getValue();
-        System.out.println("Saved forge version as: " + chooseForgeVersion.getValue());
+        System.out.println("Saved forge version as: " + forgeVersion);
     }
 
     private void showMinecraftVersions() throws IOException {
@@ -92,7 +99,7 @@ public class UFI extends Application {
         chooseMinecraftVersion.setConverter(new StringConverter<>() {
             @Override
             public String toString(Pair<String, String> pair) {
-                return pair.getKey();
+                return pair == null ? "" : pair.getKey();
             }
 
             @Override
@@ -101,22 +108,17 @@ public class UFI extends Application {
             }
         });
 
-        chooseMinecraftVersion.getItems().add(minecraftVersion);
         chooseMinecraftVersion.getItems().addAll(assetClasses);
-        System.out.println(chooseMinecraftVersion.getItems());
-        chooseMinecraftVersion.setValue(minecraftVersion);
+//        System.out.println(chooseMinecraftVersion.getItems());
     }
 
-    private void showForgeVersions() {
-        List<Pair<String, String>> assetClasses = new ArrayList<>();
-        assetClasses.add(new Pair<>("forge version 2", "f2"));
-        assetClasses.add(new Pair<>("forge version 3", "f3"));
-        assetClasses.add(new Pair<>("forge version 4", "f4"));
+    private void updateForgeVersions() throws IOException {
+        List<Pair<String, String>> assetClasses = getForgeVersions();
 
         chooseForgeVersion.setConverter(new StringConverter<>() {
             @Override
             public String toString(Pair<String, String> pair) {
-                return pair.getKey();
+                return pair == null ? "" : pair.getKey();
             }
 
             @Override
@@ -126,13 +128,22 @@ public class UFI extends Application {
         });
 
         chooseForgeVersion.getItems().add(forgeVersion);
-        chooseForgeVersion.getItems().addAll(assetClasses);
+        chooseForgeVersion.getItems().setAll(assetClasses);
         chooseForgeVersion.setValue(forgeVersion);
     }
 
     private List<Pair<String, String>> getMinecraftVersions() throws IOException {
         List<Pair<String, String>> assetClasses = new ArrayList<>();
         List<String> versions = Fetcher.getMinecraftVersionsForForge();
+        for(String version : versions){
+            assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
+        }
+        return assetClasses;
+    }
+
+    private List<Pair<String, String>> getForgeVersions() throws IOException {
+        List<Pair<String, String>> assetClasses = new ArrayList<>();
+        List<String> versions = Fetcher.getForgeVersionsForMinecraft(minecraftVersion.getKey());
         for(String version : versions){
             assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
         }
