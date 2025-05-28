@@ -26,13 +26,14 @@ application {
 
 javafx {
     version = '20.0.1'
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.graphics']
 }
 
 tasks.withType(JavaExec).configureEach {
     jvmArgs = [
             '--module-path', "${System.getProperty('java.home')}/lib",
-            '--add-modules', 'javafx.controls,javafx.fxml'
+            '--add-modules', 'javafx.controls,javafx.graphics',
+            '--enable-native-access=javafx.graphics'
     ]
 }
 
