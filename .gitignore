@@ -1,6 +1,29 @@
-/javafx
-/.idea
-/out
-/gson-2.13.1.jar
-/jsoup-1.20.1.jar
-/META-INF/MANIFEST.MF
+# === Gradle ===
+.gradle/
+build/
+
+# === IntelliJ IDEA ===
+.idea/
+*.iml
+out/
+
+# === Java ===
+*.class
+*.jar
+*.war
+*.ear
+
+# === Logs ===
+*.log
+
+# === OS системные файлы ===
+.DS_Store
+Thumbs.db
+
+# === Temporary files ===
+*.tmp
+*.temp
+
+# === Others ===
+*.swp
+*~
