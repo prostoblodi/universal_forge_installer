@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2' // Для сборки fat jar
+}
+
+java {
+    modularity.inferModulePath = false // Отключаем модульность для fat jar
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.jsoup:jsoup:1.15.4'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+}
+
+application {
+    mainClass = 'Main' // Полный путь, если класс в пакете
+}
+
+javafx {
+    version = '20.0.1' // Убедитесь, что версия совпадает с JavaFX
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs = [
+            '--module-path', "${System.getProperty('java.home')}/lib",
+            '--add-modules', 'javafx.controls,javafx.fxml'
+    ]
+}
+
+tasks.shadowJar {
+    mergeServiceFiles()
+    exclude 'module-info.class' // Обязательно исключаем module-info
+}
