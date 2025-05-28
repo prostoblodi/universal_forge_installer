@@ -2,11 +2,11 @@ plugins {
     id 'java'
     id 'application'
     id 'org.openjfx.javafxplugin' version '0.1.0'
-    id 'com.github.johnrengelman.shadow' version '7.1.2' // Для сборки fat jar
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 java {
-    modularity.inferModulePath = false // Отключаем модульность для fat jar
+    modularity.inferModulePath = false
 }
 
 repositories {
@@ -21,11 +21,11 @@ dependencies {
 }
 
 application {
-    mainClass = 'Main' // Полный путь, если класс в пакете
+    mainClass = 'Main'
 }
 
 javafx {
-    version = '20.0.1' // Убедитесь, что версия совпадает с JavaFX
+    version = '20.0.1'
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
@@ -38,5 +38,5 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.shadowJar {
     mergeServiceFiles()
-    exclude 'module-info.class' // Обязательно исключаем module-info
+    exclude 'module-info.class'
 }
