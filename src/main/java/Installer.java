@@ -45,7 +45,7 @@ public class Installer {
     }
 
     public static void install_forge(String minecraftVersion, String forgeVersion) throws IOException {
-        String fileName = String.format("Forge %s(%s).jar", forgeVersion, minecraftVersion);
+        String fileName = String.format("Forge%s(%s).jar", forgeVersion, minecraftVersion);
         Path filePath = Paths.get(System.getProperty("user.dir"), fileName);
 
         URL url = new URL(String.format("https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar", minecraftVersion, forgeVersion, minecraftVersion, forgeVersion));
@@ -59,12 +59,24 @@ public class Installer {
             throw new IOException("Ошибка при загрузке Forge с URL: " + url, e);
         }
 
-//        Runtime.getRuntime().exec(String.format("/usr/lib/jvm/java-24-openjdk/bin/java -jar -Ddebug=true 'Forge %s (%s).jar'", forgeVersion, minecraftVersion));
+        try {
+            Runtime.getRuntime().exec(String.format("java -jar %s", filePath.toAbsolutePath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        System.out.println("s");
+
     }
 
 //    public static void main(String[] args) throws IOException {
 // //        System.out.println(getForgeVersionsForMinecraft("1.21.1"));
 // //        System.out.println(getMinecraftVersionsForForge());
 // //        download_forge("1.17.1","37.1.1");
+// //           try {
+// //               Runtime.getRuntime().exec("usr/lib/jvm/java-24-openjdk/bin/java --version");
+// //           } catch (Exception e){
+// //               System.out.println(e);
+// //           }
 //    }
 }
