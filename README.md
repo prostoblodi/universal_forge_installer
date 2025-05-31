@@ -1,4 +1,4 @@
-# An application that will allow you to download and install any version of Minecraft Forge. Currently, you can do this with versions of Forge that use a version of Minecraft higher than 1.5.1.
+# An application that allows you to download and install any version of Forge.
 ![изображение](https://github.com/user-attachments/assets/84531044-8185-48dd-902b-1c4ced9ad554)
 
 # How to run it?
