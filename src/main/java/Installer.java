@@ -1,4 +1,6 @@
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,37 +49,87 @@ public class Installer {
         return versions;
     }
 
-    public static void install_forge(String minecraftVersion, String forgeVersion) throws IOException {
+    public static void install_forge(String minecraftVersion, String forgeVersion) throws IOException, URISyntaxException {
         String userDir = System.getProperty("user.dir");
-        Path forgeJarsDir = Paths.get(userDir, "ForgeJars");
+        Path forgeJarsDir = Paths.get(userDir, "ForgeJars", String.valueOf(minecraftVersion));
 
         if (!forgeJarsDir.toFile().exists()) {
             Files.createDirectory(forgeJarsDir);
             System.out.println("The ForgeJars folder has been successfully created.");
         }
 
-        String fileName = String.format("Forge_%s(%s).jar", forgeVersion, minecraftVersion);
-        Path filePath = forgeJarsDir.resolve(fileName);
+        String[] versionParsed = minecraftVersion.split("\\.");
+        boolean isNewIndex = versionParsed.length > 2 &&
+                (Integer.parseInt(versionParsed[1]) > 5 ||
+                (Integer.parseInt(versionParsed[1]) == 5 && Integer.parseInt(versionParsed[2]) == 2));
 
-        if (!filePath.toAbsolutePath().toFile().exists()) {
-            URL url = new URL(String.format(
-                    "https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar",
-                    minecraftVersion, forgeVersion, minecraftVersion, forgeVersion
-            ));
+        if(isNewIndex) {
+            String fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
+            Path filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
 
-            System.out.println("File Download...");
+            if (!filePath.toFile().exists()) {
+                URL url = new URI(String.format(
+                        "https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar",
+                        minecraftVersion, forgeVersion, minecraftVersion, forgeVersion
+                )).toURL();
 
-            try (InputStream inputStream = url.openStream()) {
-                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Forge has been successfully downloaded to: " + filePath.toAbsolutePath());
-            } catch (IOException e) {
-                throw new IOException("Error downloading Forge from URL: " + url, e);
+                System.out.printf("Download file %s to %s... %n", fileName, filePath);
+
+                try (InputStream inputStream = url.openStream()) {
+                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+                    System.out.printf("%s has been successfully downloaded to: %s%n", fileName, filePath);
+                } catch (IOException e) {
+                    throw new IOException("Error downloading Forge from URL: " + url, e);
+                }
             }
+            launch_forge(filePath, fileName);
+        }
+        else {
+            String fileName = String.format("Forge_%s_%s.zip", forgeVersion, minecraftVersion);
+            Path filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
+
+            if(!filePath.toFile().exists()){
+                URL url = new URI(String.format(
+                        "https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-universal.zip",
+                        minecraftVersion, forgeVersion, minecraftVersion, forgeVersion)).toURL();
+
+                System.out.printf("Download file %s to %s....", fileName, filePath);
+                try (InputStream inputStream = url.openStream()) {
+                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+                    System.out.printf("%s has been successfully downloaded to: %s%n", fileName, filePath);
+                } catch (IOException e) {
+                    throw new IOException("Error downloading Forge from URL: " + url, e);
+                }
+            }
+
+
+        }
+    }
+
+    private static void launch_forge(Path filePath, String fileName){
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+        //noinspection MethodCanBeExtracted
+        String[] command;
+
+        final String reducedPath = filePath.getParent().toString();
+        final String modifiedFileName = String.format("'%s'", fileName);
+        if (isWindows) {
+            command = new String[] {
+                    "cmd", "/c",
+                    "cd /d " + reducedPath + " && java -jar " + modifiedFileName
+            };
+        } else {
+            command = new String[] {
+                    "bash", "-c",
+                    "cd " + reducedPath + " && java -jar " + modifiedFileName
+            };
         }
 
         try {
-            Runtime.getRuntime().exec(String.format("java -jar %s", filePath.toAbsolutePath()));
-            System.out.printf("Forge file at %s launched!%n", filePath.toAbsolutePath());
+            new ProcessBuilder(command)
+                    .inheritIO()
+                    .start();
+            System.out.println("Forge file launched!");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

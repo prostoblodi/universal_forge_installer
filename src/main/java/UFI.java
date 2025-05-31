@@ -10,6 +10,7 @@ import javafx.util.Pair;
 import javafx.util.StringConverter;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -81,7 +82,7 @@ public class UFI extends Application {
                 (_) -> {
                     try {
                         Installer.install_forge(minecraftVersion.getKey(), forgeVersion.getKey());
-                    } catch (IOException e) {
+                    } catch (IOException | URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
                 }
