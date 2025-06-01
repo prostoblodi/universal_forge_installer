@@ -15,7 +15,7 @@ import org.jsoup.select.Elements;
 
 public class Installer {
 
-    // method, that returns all versions of minecraft, for which forge is available
+    // Return all versions of Minecraft for which Forge is available
     public static List<String> getMinecraftVersionsForForge() throws IOException {
         List<String> versions = new ArrayList<>();
         Document document = Jsoup.connect("https://files.minecraftforge.net/net/minecraftforge/forge/").get();
@@ -31,7 +31,7 @@ public class Installer {
         return versions;
     }
 
-    // method, that returns all versions of forge, available for the entered version of minecraft
+    // Return all versions of Forge available for the entered Minecraft version
     public static List<String> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
         List<String> versions = new ArrayList<>();
         if (Objects.equals(minecraftVersion, "")) {
@@ -49,6 +49,7 @@ public class Installer {
         return versions;
     }
 
+    // Downloads and run Forge
     public static void install_forge(String minecraftVersion, String forgeVersion) throws IOException, URISyntaxException {
         String userDir = System.getProperty("user.dir");
         Path forgeJarsDir = Paths.get(userDir, "ForgeJars", String.valueOf(minecraftVersion));
@@ -82,7 +83,7 @@ public class Installer {
                     throw new IOException("Error downloading Forge from URL: " + url, e);
                 }
             }
-            launch_forge(filePath, fileName);
+            run_forge(filePath, fileName);
         }
         else {
             String fileName = String.format("Forge_%s_%s.zip", forgeVersion, minecraftVersion);
@@ -106,7 +107,7 @@ public class Installer {
         }
     }
 
-    private static void launch_forge(Path filePath, String fileName){
+    private static void run_forge(Path filePath, String fileName){
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
         //noinspection MethodCanBeExtracted
         String[] command;
