@@ -27,7 +27,7 @@ public class Installer {
             versions.add(a.text().trim());
         }
 
-        System.out.println("Versions of minecraft successfully received: " + versions);
+        System.out.println("Versions of Minecraft successfully received: " + versions);
         return versions;
     }
 
@@ -41,30 +41,30 @@ public class Installer {
         Document document = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
         Elements tds = document.select(".download-version");
 
-        for (Element td : tds){
+        for (Element td : tds) {
             versions.add(td.text().trim());
         }
 
-        System.out.println("Versions of forge successfully received: " + versions);
+        System.out.println("Versions of Forge successfully received: " + versions);
         return versions;
     }
 
-    // Downloads and run Forge
+    // Download and run Forge
     public static void install_forge(String minecraftVersion, String forgeVersion) throws IOException, URISyntaxException {
         String userDir = System.getProperty("user.dir");
         Path forgeJarsDir = Paths.get(userDir, "ForgeJars", String.valueOf(minecraftVersion));
 
         if (!forgeJarsDir.toFile().exists()) {
             Files.createDirectory(forgeJarsDir);
-            System.out.println("The ForgeJars folder has been successfully created.");
+            System.out.println("The ForgeJars folder is successfully created.");
         }
 
         String[] versionParsed = minecraftVersion.split("\\.");
         boolean isNewIndex = versionParsed.length > 2 &&
                 (Integer.parseInt(versionParsed[1]) > 5 ||
-                (Integer.parseInt(versionParsed[1]) == 5 && Integer.parseInt(versionParsed[2]) == 2));
+                        (Integer.parseInt(versionParsed[1]) == 5 && Integer.parseInt(versionParsed[2]) == 2));
 
-        if(isNewIndex) {
+        if (isNewIndex) {
             String fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
             Path filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
 
@@ -78,18 +78,17 @@ public class Installer {
 
                 try (InputStream inputStream = url.openStream()) {
                     Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-                    System.out.printf("%s has been successfully downloaded to: %s%n", fileName, filePath);
+                    System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
                 } catch (IOException e) {
                     throw new IOException("Error downloading Forge from URL: " + url, e);
                 }
             }
             run_forge(filePath, fileName);
-        }
-        else {
+        } else {
             String fileName = String.format("Forge_%s_%s.zip", forgeVersion, minecraftVersion);
             Path filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
 
-            if(!filePath.toFile().exists()){
+            if (!filePath.toFile().exists()) {
                 URL url = new URI(String.format(
                         "https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-universal.zip",
                         minecraftVersion, forgeVersion, minecraftVersion, forgeVersion)).toURL();
@@ -97,17 +96,15 @@ public class Installer {
                 System.out.printf("Download file %s to %s....", fileName, filePath);
                 try (InputStream inputStream = url.openStream()) {
                     Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-                    System.out.printf("%s has been successfully downloaded to: %s%n", fileName, filePath);
+                    System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
                 } catch (IOException e) {
                     throw new IOException("Error downloading Forge from URL: " + url, e);
                 }
             }
-
-
         }
     }
 
-    private static void run_forge(Path filePath, String fileName){
+    private static void run_forge(Path filePath, String fileName) {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
         //noinspection MethodCanBeExtracted
         String[] command;
@@ -115,12 +112,12 @@ public class Installer {
         final String reducedPath = filePath.getParent().toString();
         final String modifiedFileName = String.format("'%s'", fileName);
         if (isWindows) {
-            command = new String[] {
+            command = new String[]{
                     "cmd", "/c",
                     "cd /d " + reducedPath + " && java -jar " + modifiedFileName
             };
         } else {
-            command = new String[] {
+            command = new String[]{
                     "bash", "-c",
                     "cd " + reducedPath + " && java -jar " + modifiedFileName
             };
@@ -136,13 +133,14 @@ public class Installer {
         }
     }
 
+    // Main method for testing purposes
 //    public static void main(String[] args) throws IOException {
 // //        System.out.println(getForgeVersionsForMinecraft("1.21.1"));
 // //        System.out.println(getMinecraftVersionsForForge());
-// //        download_forge("1.17.1","37.1.1");
+// //        download_forge("1.17.1", "37.1.1");
 // //           try {
 // //               Runtime.getRuntime().exec("usr/lib/jvm/java-24-openjdk/bin/java --version");
-// //           } catch (Exception e){
+// //           } catch (Exception e) {
 // //               System.out.println(e);
 // //           }
 //    }
