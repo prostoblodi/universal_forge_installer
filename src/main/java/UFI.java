@@ -1,4 +1,6 @@
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -25,11 +27,15 @@ public class UFI extends Application {
     private final Label mainLabel = new Label("Universal Forge Installer");
     private final Label minecraftVersionLabel = new Label("Minecraft version: ");
     private final Label forgeVersionLabel = new Label("Forge version: ");
+    private static final Label statusLabel = new Label("Привет, мир!");
+    private static final SimpleStringProperty textProperty = new SimpleStringProperty("Привет, мир!");
 
     private final Button downloadButton = new Button("Download");
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        statusLabel.textProperty().bind(textProperty);
         setLBStyles();
 
         GridPane gp = new GridPane();
@@ -40,20 +46,19 @@ public class UFI extends Application {
         gp.setHgap(10);
         gp.setVgap(10);
 
-        VBox vbox = new VBox(mainLabel, gp, downloadButton);
+        VBox vbox = new VBox(mainLabel, gp, downloadButton, statusLabel);
         vbox.getStyleClass().add("vbox");
 
         Scene scene = new Scene(vbox);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles.css")).toExternalForm());
-
-        showMinecraftVersions();
-        updateForgeVersions();
 
         setActions();
 
         primaryStage.setTitle("Universal Forge Installer");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        showMinecraftVersions();
     }
 
     private void setLBStyles(){ // LB means Labels and Buttons
@@ -61,6 +66,7 @@ public class UFI extends Application {
         minecraftVersionLabel.getStyleClass().add("label");
         forgeVersionLabel.getStyleClass().add("label");
         downloadButton.getStyleClass().add("button");
+        statusLabel.getStyleClass().add("status-label");
     }
 
     private void setActions(){
@@ -81,7 +87,12 @@ public class UFI extends Application {
         downloadButton.setOnAction(
                 (_) -> {
                     try {
-                        Installer.install_forge(minecraftVersion.getKey(), forgeVersion.getKey());
+                        updateStatusLabel((byte) 1);
+                        Installer.download_forge(minecraftVersion.getKey(), forgeVersion.getKey());
+                     Platform.runLater(() -> {
+                        if (Installer.isNewIndex(minecraftVersion.getKey())){updateStatusLabel((byte) 0);}
+                        else {updateStatusLabel((byte) 2);}
+                     });
                     } catch (IOException | URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
@@ -101,7 +112,9 @@ public class UFI extends Application {
     }
 
     private void showMinecraftVersions() throws IOException {
+        updateStatusLabel((byte) 3);
         List<Pair<String, String>> assetClasses = getMinecraftVersions();
+        updateStatusLabel((byte) 0);
 
         chooseMinecraftVersion.setConverter(new StringConverter<>() {
             @Override
@@ -116,11 +129,12 @@ public class UFI extends Application {
         });
 
         chooseMinecraftVersion.getItems().addAll(assetClasses);
-//        System.out.println(chooseMinecraftVersion.getItems());
     }
 
     private void updateForgeVersions() throws IOException {
+        updateStatusLabel((byte) 4);
         List<Pair<String, String>> assetClasses = getForgeVersions();
+        updateStatusLabel((byte) 0);
 
         chooseForgeVersion.setConverter(new StringConverter<>() {
             @Override
@@ -155,6 +169,22 @@ public class UFI extends Application {
             assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
         }
         return assetClasses;
+    }
+
+    public static void updateStatusLabel(byte status) {
+        if (status == 0){
+            textProperty.set("");
+        } else if (status == 1){
+            textProperty.set("Downloading...");
+        } else if (status == 2){
+            textProperty.set("Downloaded!");
+        } else if (status == 3){
+            textProperty.set("Receiving minecraft versions...");
+        } else if (status == 4){
+            textProperty.set("Receiving forge versions...");
+        }
+        System.out.println("Current text: " + textProperty.get());
+
     }
 
     public static void main(String[] args) {
