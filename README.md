@@ -1,5 +1,6 @@
 # An application that allows you to download and install any version of Forge.
-![изображение](https://github.com/user-attachments/assets/84531044-8185-48dd-902b-1c4ced9ad554)
+![изображение](https://github.com/user-attachments/assets/1037d3ee-0ce3-46d5-a79f-1a92aec38ff9)
+
 
 # How to run it?
 First, you need to download .jar file from [latest available version of UFI](https://github.com/prostoblodi/universal_forge_installer/releases/latest)
