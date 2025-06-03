@@ -2,7 +2,7 @@
 .vbox {
     -fx-spacing: 10.0; /* Distance between objects */
     -fx-alignment: center; /* Objects alignment */
-    -fx-padding: 40; /* Distance between objects and window border */
+    -fx-padding: 30; /* Distance between objects and window border */
     -fx-background-color: #242424; /* Window background colour */
 }
 
@@ -24,9 +24,9 @@
 .status-label {
     -fx-text-fill: #F0F0F0; /* Text colour */
     -fx-alignment: center; /* Positioning the text relative to the window */
-    -fx-font-size: 16px; /* Размер текста */
-    -fx-pref-width: 200; /* Preferred width */
-    -fx-pref-height: 30;
+    -fx-font-size: 14px; /* Text size */
+    -fx-pref-width: 180; /* Preferred width */
+    -fx-pref-height: 14;
 }
 
 
@@ -41,6 +41,7 @@
 /* Versions choose box style */
 .combo-box {
     -fx-background-color: #383838; /* Box colour */
+    -fx-alignment: left; /* Positioning the text relative to the window */
 }
 
 /* Versions choose box style */

@@ -13,7 +13,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class Installer {
+public abstract class Installer implements Runnable {
 
     // Return all versions of Minecraft for which Forge is available
     public static List<String> getMinecraftVersionsForForge() throws IOException {
@@ -71,15 +71,16 @@ public class Installer {
 
                 System.out.printf("Download file %s to %s... %n", fileName, filePath);
 
-                long startTime = System.currentTimeMillis(); // начало таймера
+                long startTime = System.currentTimeMillis();
 
                 try (InputStream inputStream = url.openStream()) {
                     Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
+                    UFI.updateStatusLabel((byte) 5);
                     throw new IOException("Error downloading Forge from URL: " + url, e);
                 }
 
-                long endTime = System.currentTimeMillis(); // конец таймера
+                long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
 
                 System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
@@ -97,15 +98,16 @@ public class Installer {
 
                 System.out.printf("Download file %s to %s....", fileName, filePath);
 
-                long startTime = System.currentTimeMillis(); // начало таймера
+                long startTime = System.currentTimeMillis();
 
                 try (InputStream inputStream = url.openStream()) {
                     Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
+                    UFI.updateStatusLabel((byte) 5);
                     throw new IOException("Error downloading Forge from URL: " + url, e);
                 }
 
-                long endTime = System.currentTimeMillis(); // конец таймера
+                long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
 
                 System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
