@@ -193,6 +193,20 @@ public class UFI extends Application {
         return assetClasses;
     }
 
+    /** Method that assigns a value to the status label
+     *
+     * @param status number that determines which status to set according to this logic:
+     * <ul>
+     *      <li>0 - idle(nothing)</li>
+     *      <li>1 - downloading</li>
+     *      <li>2 - downloaded</li>
+     *      <li>3 - minecraft versions are receiving</li>
+     *      <li>4 - forge versions are receiving</li>
+     *      <li>5 - error</li>
+     *      <li>6 - if the user clicks download without selecting a version</li>
+     * </ul>
+     */
+
     public static void updateStatusLabel(byte status) {
         Platform.runLater(() -> {
             switch (status) {
