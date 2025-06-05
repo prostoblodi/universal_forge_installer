@@ -34,6 +34,7 @@ public abstract class Installer implements Runnable {
     // Return all versions of Forge available for the entered Minecraft version
     public static List<String> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
         List<String> versions = new ArrayList<>();
+
         if (Objects.equals(minecraftVersion, "")) {
             return versions;
         }
