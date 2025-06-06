@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 
+import javafx.util.Pair;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -51,71 +52,57 @@ public abstract class Installer implements Runnable {
     }
 
     // Download and run Forge
-    public static void download_forge(String minecraftVersion, String forgeVersion) throws IOException, URISyntaxException {
-        String userDir = System.getProperty("user.dir");
-        Path forgeJarsDir = Paths.get(userDir, "ForgeJars", String.valueOf(minecraftVersion));
+    public static void download_forge(String minecraftVersion, Pair<String, String> forgeVersionPair) throws IOException, URISyntaxException {
+        Path forgeJarsDir = Paths.get(System.getProperty("user.dir"), "ForgeJars", String.valueOf(minecraftVersion));
+        Path filePath;
+
+        String forgeVersion = forgeVersionPair.getKey();
+        String fileName;
+
+        Document document = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
+        Elements downloadLinks;
+
+        byte howOldIndex = howOldIndex(minecraftVersion);
 
         if (!forgeJarsDir.toFile().exists()) {
             Files.createDirectory(forgeJarsDir);
             System.out.println("The ForgeJars folder is successfully created.");
         }
 
-        if (isNewIndex(minecraftVersion)) {
-            String fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
-            Path filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
-
-            if (!filePath.toFile().exists()) {
-                URL url = new URI(String.format(
-                        "https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-installer.jar",
-                        minecraftVersion, forgeVersion, minecraftVersion, forgeVersion
-                )).toURL();
-
-                System.out.printf("Download file %s to %s... %n", fileName, filePath);
-
-                long startTime = System.currentTimeMillis();
-
-                try (InputStream inputStream = url.openStream()) {
-                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    UFI.updateStatusLabel((byte) 5);
-                    throw new IOException("Error downloading Forge from URL: " + url, e);
-                }
-
-                long endTime = System.currentTimeMillis();
-                long duration = endTime - startTime;
-
-                System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
-                System.out.printf("Download took %d milliseconds (%.2f seconds)%n", duration, duration / 1000.0);
-            }
-            run_forge(filePath, fileName);
+        if (howOldIndex == 2) {
+            fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
+            downloadLinks = document.select("a:contains(Installer)");
         } else {
-            String fileName = String.format("Forge_%s_%s.zip", forgeVersion, minecraftVersion);
-            Path filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
-
-            if (!filePath.toFile().exists()) {
-                URL url = new URI(String.format(
-                        "https://maven.minecraftforge.net/net/minecraftforge/forge/%s-%s/forge-%s-%s-universal.zip",
-                        minecraftVersion, forgeVersion, minecraftVersion, forgeVersion)).toURL();
-
-                System.out.printf("Download file %s to %s....", fileName, filePath);
-
-                long startTime = System.currentTimeMillis();
-
-                try (InputStream inputStream = url.openStream()) {
-                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException e) {
-                    UFI.updateStatusLabel((byte) 5);
-                    throw new IOException("Error downloading Forge from URL: " + url, e);
-                }
-
-                long endTime = System.currentTimeMillis();
-                long duration = endTime - startTime;
-
-                System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
-                System.out.printf("Download took %d milliseconds (%.2f seconds)%n", duration, duration / 1000.0);
-            }
+            if (howOldIndex == 1){downloadLinks = document.select("a:contains(Universal)");}
+            else {downloadLinks = document.select("a:contains(Client)");}
+            fileName = String.format("Forge_%s_%s.zip", forgeVersion, minecraftVersion);
         }
+
+        filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
+
+        Element hasDownloadLink = downloadLinks.get(Integer.parseInt(forgeVersionPair.getValue()));
+        URL url = new URI(hasDownloadLink.attr("href").split("&url=")[1]).toURL();
+
+        System.out.printf("Download file %s to %s... %n", fileName, filePath);
+
+        long startTime = System.currentTimeMillis();
+
+        try (InputStream inputStream = url.openStream()) {
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            UFI.updateStatusLabel((byte) 5);
+            throw new IOException("Error downloading Forge from URL: " + url, e);
+        }
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
+        System.out.printf("Download took %d milliseconds (%.2f seconds)%n", duration, duration / 1000.0);
+
+        if (howOldIndex(minecraftVersion) == 2) {run_forge(filePath, fileName);}
     }
+
 
 
     private static void run_forge(Path filePath, String fileName) {
@@ -153,13 +140,22 @@ public abstract class Installer implements Runnable {
         }
     }
 
-    public static boolean isNewIndex(String minecraftVersion){
-        String[] versionParsed = minecraftVersion.split("\\.");
+    public static byte howOldIndex(String minecraftVersion){
+        String[] versionStringParsed = minecraftVersion.split("\\.");
+        int[] versionParsed = new int[versionStringParsed.length];
 
-        return (versionParsed.length > 2 &&
-                (Integer.parseInt(versionParsed[1]) > 5 ||
-                        (Integer.parseInt(versionParsed[1]) == 5 && Integer.parseInt(versionParsed[2]) == 2))) ||
-                ((versionParsed.length == 2) && (Integer.parseInt(versionParsed[1]) > 5));
+        for (int i = 0; i < versionStringParsed.length; i++) {
+            versionParsed[i] = Integer.parseInt(versionStringParsed[i]);
+        }
+
+        if (versionParsed[1] > 5 || (versionParsed[1] == 5 && versionParsed[2] == 2)) {
+            return (byte) 2;
+        } else if(versionParsed[1] == 4 || (versionParsed[1] == 5) || (versionParsed[1] == 3 && versionParsed[2] == 2)){
+            return (byte) 1;
+        } else {
+            return (byte) 0;
+        }
+
     }
 
     // Main method for testing purposes

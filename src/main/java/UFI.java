@@ -105,7 +105,7 @@ public class UFI extends Application {
                     updateStatusLabel((byte) 1);
                     new Thread(() -> {
                         try {
-                            Installer.download_forge(minecraftVersion.getKey(), forgeVersion.getKey());
+                            Installer.download_forge(minecraftVersion.getKey(), forgeVersion);
                             Platform.runLater(() -> updateStatusLabel((byte) 2));
                         } catch (IOException | URISyntaxException e) {
                             UFI.updateStatusLabel((byte) 5);
