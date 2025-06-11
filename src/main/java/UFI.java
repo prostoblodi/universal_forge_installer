@@ -31,7 +31,12 @@ public class UFI extends Application {
     private static final Label statusLabel = new Label("");
     private static final SimpleStringProperty textProperty = new SimpleStringProperty("");
 
-    private final Button downloadButton = new Button("Download");
+    private final Button downloadButton = new Button("Download & Launch");
+    private final Button settingsButton = new Button("Settings");
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -45,9 +50,9 @@ public class UFI extends Application {
         gp.add(chooseForgeVersion, 1, 2);
         gp.setHgap(10);
         gp.setVgap(10);
-        gp.setAlignment(Pos.BASELINE_CENTER);
+        gp.setAlignment(Pos.CENTER);
 
-        VBox vbox = new VBox(mainLabel, gp, downloadButton, statusLabel);
+        VBox vbox = new VBox(mainLabel, gp, downloadButton, settingsButton, statusLabel);
         vbox.getStyleClass().add("vbox");
 
         Scene scene = new Scene(vbox);
@@ -80,6 +85,7 @@ public class UFI extends Application {
         minecraftVersionLabel.getStyleClass().add("label");
         forgeVersionLabel.getStyleClass().add("label");
         downloadButton.getStyleClass().add("button");
+        settingsButton.getStyleClass().add("button");
         statusLabel.getStyleClass().add("status-label");
     }
 
@@ -114,6 +120,8 @@ public class UFI extends Application {
                     }).start();
                 }
         );
+
+        settingsButton.setOnAction((_) -> new Settings().show());
     }
 
     private void saveMinecraftVersion() throws IOException {
@@ -219,9 +227,5 @@ public class UFI extends Application {
             }
             System.out.println("Current status: " + textProperty.get());
         });
-    }
-
-    public static void main(String[] args) {
-        launch(args);
     }
 }

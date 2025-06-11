@@ -53,7 +53,7 @@ public abstract class Installer implements Runnable {
 
     // Download and run Forge
     public static void download_forge(String minecraftVersion, Pair<String, String> forgeVersionPair) throws IOException, URISyntaxException {
-        Path forgeJarsDir = Paths.get(System.getProperty("user.dir"), "ForgeJars", String.valueOf(minecraftVersion));
+        Path forgeJarsDir = Paths.get(System.getProperty("user.dir"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
         Path filePath;
 
         String forgeVersion = forgeVersionPair.getKey();
@@ -108,12 +108,7 @@ public abstract class Installer implements Runnable {
     private static void run_forge(Path filePath, String fileName) {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
-        //ignore the comments at the bottom, it's for the IDE(if you reduce their number, they become meaningless)
-        //noinspection MethodCanBeExtracted
-        //noinspection MethodCanBeExtracted
-        //noinspection MethodCanBeExtracted
-        //noinspection MethodCanBeExtracted
-        //noinspection MethodCanBeExtracted
+        // .
         String[] command;
 
         final String reducedPath = filePath.getParent().toString();

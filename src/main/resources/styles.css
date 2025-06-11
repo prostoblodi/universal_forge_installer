@@ -4,11 +4,11 @@
     -fx-alignment: center; /* Objects alignment */
     -fx-padding: 30; /* Distance between objects and window border */
     -fx-background-color: #242424; /* Window background colour */
+    -fx-pref-width: 410; /* Preferred width */
 }
 
 /* Universal Forge Installer style */
 .label-main {
-    -fx-pref-width: 250; /* Preferred width */
     -fx-alignment: center; /* Positioning the text relative to the window */
     -fx-font-size: 16px; /* Size of font */
     -fx-text-fill: #F0F0F0; /* Text colour */
@@ -17,7 +17,6 @@
 /* Minecraft and Forge versions text style */
 .label {
     -fx-text-fill: #F0F0F0; /* Text colour */
-    -fx-pref-width: 200; /* Preferred width */
 }
 
 /* Status label style */
@@ -29,8 +28,7 @@
     -fx-pref-height: 14;
 }
 
-
-/* Download button style */
+/* Buttons style */
 .button {
     -fx-alignment: center; /* Positioning the text relative to the window */
     -fx-background-color: #383838; /* Button colour */
