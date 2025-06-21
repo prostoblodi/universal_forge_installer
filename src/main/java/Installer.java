@@ -14,10 +14,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public abstract class Installer implements Runnable {
+abstract class Installer implements Runnable {
 
     // Return all versions of Minecraft for which Forge is available
-    public static List<String> getMinecraftVersionsForForge() throws IOException {
+    protected static List<String> getMinecraftVersionsForForge() throws IOException {
         List<String> versions = new ArrayList<>();
         Document document = Jsoup.connect("https://files.minecraftforge.net/net/minecraftforge/forge/").get();
 
@@ -33,7 +33,7 @@ public abstract class Installer implements Runnable {
     }
 
     // Return all versions of Forge available for the entered Minecraft version
-    public static List<String> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
+    protected static List<String> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
         List<String> versions = new ArrayList<>();
 
         if (Objects.equals(minecraftVersion, "")) {
@@ -52,7 +52,7 @@ public abstract class Installer implements Runnable {
     }
 
     // Download and run Forge
-    public static void download_forge(String minecraftVersion, Pair<String, Byte> forgeVersionPair) throws IOException, URISyntaxException {
+    protected static void download_forge(String minecraftVersion, Pair<String, Byte> forgeVersionPair) throws IOException, URISyntaxException {
         Path forgeJarsDir = Paths.get(System.getProperty("user.dir"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
         Path filePath;
 
@@ -103,8 +103,6 @@ public abstract class Installer implements Runnable {
         if (howOldIndex(minecraftVersion) == 2) {run_forge(filePath, fileName);}
     }
 
-
-
     private static void run_forge(Path filePath, String fileName) {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
@@ -135,7 +133,7 @@ public abstract class Installer implements Runnable {
         }
     }
 
-    public static byte howOldIndex(String minecraftVersion){
+    protected static byte howOldIndex(String minecraftVersion){
         String[] versionStringParsed = minecraftVersion.split("\\.");
         int[] versionParsed = new int[versionStringParsed.length];
 

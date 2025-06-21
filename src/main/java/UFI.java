@@ -12,8 +12,12 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,14 +38,19 @@ public class UFI extends Application {
     private final Button downloadButton = new Button("Download & Launch");
     private final Button settingsButton = new Button("Settings");
 
+    protected static byte defaultForgeVersion;
+    protected static boolean customForgeLaunch;
+
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException {
         statusLabel.textProperty().bind(textProperty);
+
         setLBStyles();
+        checkSettings();
 
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
@@ -207,7 +216,7 @@ public class UFI extends Application {
      * </ul>
      */
 
-    public static void updateStatusLabel(byte status) {
+    protected static void updateStatusLabel(byte status) {
         Platform.runLater(() -> {
             switch (status) {
                 case 0 -> textProperty.set(""); // idle
@@ -221,5 +230,40 @@ public class UFI extends Application {
             }
             System.out.println("Current status: " + textProperty.get());
         });
+    }
+
+    private static void checkSettings() throws IOException {
+        System.out.println("Г Checking settings...");
+
+        String path = String.valueOf(Paths.get(System.getProperty("user.dir"), "UFI", "UFI.settings"));
+        File file = new File(path);
+
+        if (!file.exists()) {
+            System.out.println("| Settings file do not exists at " + path);
+
+            defaultForgeVersion = 0;
+            customForgeLaunch = true;
+
+            try (FileWriter writer = new FileWriter(file)) {
+                writer.write(String.format("defaultForgeVersionByte=0%ncustomForgeLaunch=true"));
+            }
+
+            System.out.println("| Settings file created: " + path);
+        } else {
+            System.out.println("| Settings file already exists at " + path);
+
+            List<String> lines = Files.readAllLines(Paths.get(path));
+            for (String line : lines) {
+                if (line.contains("defaultForgeVersionByte")){
+                    String[] data = line.split("=");
+                    defaultForgeVersion = Byte.parseByte(data[1]);
+                } else if (line.contains("customForgeLaunch")){
+                    String[] data = line.split("=");
+                    customForgeLaunch = Boolean.parseBoolean(data[1]);
+                }
+            }
+        }
+
+        System.out.printf("L Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b%n%n", defaultForgeVersion, customForgeLaunch);
     }
 }
