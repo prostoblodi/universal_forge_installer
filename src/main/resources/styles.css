@@ -7,6 +7,15 @@
     -fx-pref-width: 410; /* Preferred width */
 }
 
+/* Settings window style */
+.settings-vbox {
+    -fx-spacing: 10.0; /* Distance between objects */
+    -fx-alignment: center; /* Objects alignment */
+    -fx-padding: 30; /* Distance between objects and window border */
+    -fx-background-color: #242424; /* Window background colour */
+    -fx-pref-width: 500; /* Preferred width */
+}
+
 /* Universal Forge Installer style */
 .label-main {
     -fx-alignment: center; /* Positioning the text relative to the window */
@@ -17,6 +26,18 @@
 /* Minecraft and Forge versions text style */
 .label {
     -fx-text-fill: #F0F0F0; /* Text colour */
+}
+
+/* Settings text style */
+.settings-label {
+    -fx-text-fill: #F0F0F0; /* Text colour */
+    -fx-font-size: 14px; /* Size of font */
+}
+
+/* Text field style */
+.text-field {
+    -fx-text-fill: #F0F0F0; /* Text colour */
+    -fx-background-color: #383838; /* Text field colour */
 }
 
 /* Status label style */

@@ -6,11 +6,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import javafx.util.StringConverter;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Objects;
 
 public class UFI extends Application {
-    private final ComboBox<Pair<String, String>> chooseMinecraftVersion = new ComboBox<>();
-    private final ComboBox<Pair<String, String>> chooseForgeVersion = new ComboBox<>();
+    private final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
+    private final ComboBox<Pair<String, Byte>> chooseForgeVersion = new ComboBox<>();
 
-    private static Pair<String, String> minecraftVersion = new Pair<>("", "");
-    private static Pair<String, String> forgeVersion = new Pair<>("", "");
+    private static String minecraftVersion = "";
+    private static Pair<String, Byte> forgeVersion = new Pair<>("", (byte) -1);
 
     private final Label mainLabel = new Label("Universal Forge Installer");
     private final Label minecraftVersionLabel = new Label("Minecraft version: ");
@@ -111,7 +111,7 @@ public class UFI extends Application {
                     updateStatusLabel((byte) 1);
                     new Thread(() -> {
                         try {
-                            Installer.download_forge(minecraftVersion.getKey(), forgeVersion);
+                            Installer.download_forge(minecraftVersion, forgeVersion);
                             Platform.runLater(() -> updateStatusLabel((byte) 2));
                         } catch (IOException | URISyntaxException e) {
                             UFI.updateStatusLabel((byte) 5);
@@ -137,65 +137,55 @@ public class UFI extends Application {
     }
 
     private void showMinecraftVersions() throws IOException {
-        List<Pair<String, String>> assetClasses = getMinecraftVersions();
-
-        Platform.runLater(() -> {
-            chooseMinecraftVersion.setConverter(new StringConverter<>() {
-                @Override
-                public String toString(Pair<String, String> pair) {
-                    return pair == null ? "" : pair.getKey();
-                }
-
-                @Override
-                public Pair<String, String> fromString(String string) {
-                    return null;
-                }
-            });
-
-            chooseMinecraftVersion.getItems().addAll(assetClasses);
-        });
+        List<String> assetClasses = getMinecraftVersions();
+        Platform.runLater(() -> chooseMinecraftVersion.getItems().addAll(assetClasses));
     }
 
     private void updateForgeVersions() throws IOException {
-        List<Pair<String, String>> assetClasses = getForgeVersions();
+        List<Pair<String, Byte>> assetClasses = getForgeVersions();
 
         Platform.runLater(() -> {
-            chooseForgeVersion.setConverter(new StringConverter<>() {
-                @Override
-                public String toString(Pair<String, String> pair) {
-                    return pair == null ? "" : pair.getKey();
-                }
+            chooseForgeVersion.getItems().setAll(assetClasses);
+            chooseForgeVersion.setValue(assetClasses.getFirst());
 
+            chooseForgeVersion.setCellFactory(_ -> new ListCell<>() {
                 @Override
-                public Pair<String, String> fromString(String s) {
-                    return null;
+                protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (item == null || empty) {
+                        setText(null);
+                    } else {
+                        setText(item.getKey()); // Отображаем только название версии
+                    }
                 }
             });
 
-            chooseForgeVersion.getItems().setAll(assetClasses);
-            chooseForgeVersion.setValue(forgeVersion);
+            chooseForgeVersion.setButtonCell(new ListCell<>() {
+                @Override
+                protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (item == null || empty) {
+                        setText(null);
+                    } else {
+                        setText(item.getKey()); // Отображаем название версии
+                    }
+                }
+            });
         });
     }
 
-    private List<Pair<String, String>> getMinecraftVersions() throws IOException {
+    private List<String> getMinecraftVersions() throws IOException {
         updateStatusLabel((byte) 3);
-        List<Pair<String, String>> assetClasses = new ArrayList<>();
-
-        List<String> versions = Installer.getMinecraftVersionsForForge();
-        for (String version : versions) {
-            assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
-        }
-
-        return assetClasses;
+        return Installer.getMinecraftVersionsForForge();
     }
 
-    private List<Pair<String, String>> getForgeVersions() throws IOException {
+    private List<Pair<String, Byte>> getForgeVersions() throws IOException {
         updateStatusLabel((byte) 4);
-        List<Pair<String, String>> assetClasses = new ArrayList<>();
+        List<Pair<String, Byte>> assetClasses = new ArrayList<>();
 
-        List<String> versions = Installer.getForgeVersionsForMinecraft(minecraftVersion.getKey());
+        List<String> versions = Installer.getForgeVersionsForMinecraft(minecraftVersion);
         for (String version : versions) {
-            assetClasses.add(new Pair<>(version, String.valueOf(versions.indexOf(version))));
+            assetClasses.add(new Pair<>(version, (byte) versions.indexOf(version)));
         }
 
         return assetClasses;
@@ -212,6 +202,8 @@ public class UFI extends Application {
      *      <li>4 - forge versions are receiving</li>
      *      <li>5 - error</li>
      *      <li>6 - if the user clicks download without selecting a version</li>
+     *      <li>7 - forge is installing</li>
+     *      <li>8 - forge is installed</li>
      * </ul>
      */
 
@@ -224,6 +216,8 @@ public class UFI extends Application {
                 case 3 -> textProperty.set("Receiving Minecraft versions...");
                 case 4 -> textProperty.set("Receiving Forge versions...");
                 case 5 -> textProperty.set("Error occurred");
+                case 6 -> textProperty.set("Installing...");
+                case 7 -> textProperty.set("Installed!");
             }
             System.out.println("Current status: " + textProperty.get());
         });

@@ -52,7 +52,7 @@ public abstract class Installer implements Runnable {
     }
 
     // Download and run Forge
-    public static void download_forge(String minecraftVersion, Pair<String, String> forgeVersionPair) throws IOException, URISyntaxException {
+    public static void download_forge(String minecraftVersion, Pair<String, Byte> forgeVersionPair) throws IOException, URISyntaxException {
         Path forgeJarsDir = Paths.get(System.getProperty("user.dir"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
         Path filePath;
 
@@ -80,7 +80,7 @@ public abstract class Installer implements Runnable {
 
         filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
 
-        Element hasDownloadLink = downloadLinks.get(Integer.parseInt(forgeVersionPair.getValue()));
+        Element hasDownloadLink = downloadLinks.get(forgeVersionPair.getValue());
         URL url = new URI(hasDownloadLink.attr("href").split("&url=")[1]).toURL();
 
         System.out.printf("Download file %s to %s... %n", fileName, filePath);

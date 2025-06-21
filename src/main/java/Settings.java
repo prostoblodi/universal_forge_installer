@@ -1,53 +1,70 @@
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ComboBox;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Settings {
     private final Label mainLabel = new Label("Settings");
 
     private final Label defaultForgeVersionLabel = new Label("Default forge version:");
-    private final ComboBox<Pair<String, String>> chooseDefaultForgeVersion = new ComboBox<>();
+    private final ComboBox<Pair<String, Byte>> chooseDefaultForgeVersion = new ComboBox<>();
+    private final List<Pair<String, Byte>> defaultForgeVersions = List.of(
+            new Pair<>("Default", (byte) 0),
+            new Pair<>("Recommended", (byte) 1),
+            new Pair<>("Newest", (byte) 2)
+    );
 
-    private final CheckBox enableCustomLaunch = new CheckBox("Enable custom forge launch");
+    private final Label enableCustomLaunchLabel = new Label("Enable custom forge launch: ");
+    private final ComboBox<Pair<String, Boolean>> enableCustomLaunch = new ComboBox<>();
+    private final List<Pair<String, Boolean>> customLaunches = List.of(
+            new Pair<>("Default", true),
+            new Pair<>("Enable", true),
+            new Pair<>("Disable", false)
+    );
 
     private final Label minecraftFolderChooseLabel = new Label("Choose minecraft folder: ");
     private final TextField minecraftFolderField = new TextField();
-    private final Button minecraftFolderButton = new Button("...");
 
     private final Stage stage = new Stage();
 
     public Settings() {
+        Button minecraftFolderButton = new Button("...");
+
         setStyles();
+        initializeDefaultForgeVersionChooser();
+        initializeEnableCustomForgeLaunch();
+        minecraftFolderButton.setOnAction((_) -> minecraftFolderField.setText(String.valueOf(new DirectoryChooser().showDialog(stage))));
 
-        GridPane gp = new GridPane();
-        gp.add(defaultForgeVersionLabel, 0, 1);
-        gp.add(chooseDefaultForgeVersion, 1, 1);
-        gp.setHgap(10);
-        gp.setVgap(10);
-        gp.setAlignment(Pos.CENTER);
+        VBox vbox = new VBox();
+        vbox.getChildren().addAll(defaultForgeVersionLabel, enableCustomLaunchLabel, minecraftFolderChooseLabel);
+        vbox.setAlignment(Pos.CENTER_LEFT);
+        vbox.setSpacing(15);
 
-        GridPane gp2 = new GridPane();
-        gp2.add(minecraftFolderChooseLabel, 0, 3);
-        gp2.add(minecraftFolderField, 1, 3);
-        gp2.add(minecraftFolderButton, 2, 3);
-        gp2.setHgap(10);
-        gp2.setVgap(10);
-        gp2.setAlignment(Pos.CENTER);
+        HBox folderChoose = new HBox();
+        folderChoose.getChildren().addAll(minecraftFolderField, minecraftFolderButton);
+        folderChoose.setAlignment(Pos.CENTER);
+        folderChoose.setSpacing(10);
 
-        VBox vbox = new VBox(mainLabel, gp, enableCustomLaunch, gp2);
-        vbox.getStyleClass().add("vbox");
+        VBox vbox2 = new VBox();
+        vbox2.getChildren().addAll(chooseDefaultForgeVersion, enableCustomLaunch, folderChoose);
+        vbox2.setAlignment(Pos.CENTER_RIGHT);
+        vbox2.setSpacing(10);
 
-        Scene scene = new Scene(vbox);
+        HBox hboxes = new HBox();
+        hboxes.getChildren().addAll(vbox, vbox2);
+        hboxes.setAlignment(Pos.CENTER);
+
+        VBox vbox3 = new VBox(mainLabel, hboxes);
+        vbox3.getStyleClass().add("settings-vbox");
+
+        Scene scene = new Scene(vbox3);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles.css")).toExternalForm());
 
         stage.setTitle("Settings");
@@ -60,8 +77,67 @@ public class Settings {
 
     private void setStyles() {
         mainLabel.getStyleClass().add("label-main");
-        defaultForgeVersionLabel.getStyleClass().add("label");
-        minecraftFolderChooseLabel.getStyleClass().add("label");
+        defaultForgeVersionLabel.getStyleClass().add("settings-label");
+        enableCustomLaunchLabel.getStyleClass().add("settings-label");
+        minecraftFolderChooseLabel.getStyleClass().add("settings-label");
         chooseDefaultForgeVersion.getStyleClass().add("combo-box");
+    }
+
+    private void initializeDefaultForgeVersionChooser(){
+        chooseDefaultForgeVersion.getItems().addAll(defaultForgeVersions);
+        chooseDefaultForgeVersion.setValue(defaultForgeVersions.getFirst());
+
+        chooseDefaultForgeVersion.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey()); // Отображаем только название версии
+                }
+            }
+        });
+
+        chooseDefaultForgeVersion.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey()); // Отображаем название версии
+                }
+            }
+        });
+    }
+
+    private void initializeEnableCustomForgeLaunch(){
+        enableCustomLaunch.getItems().addAll(customLaunches);
+        enableCustomLaunch.setValue(customLaunches.getFirst());
+
+        enableCustomLaunch.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey()); // Отображаем только название версии
+                }
+            }
+        });
+
+        enableCustomLaunch.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey()); // Отображаем название версии
+                }
+            }
+        });
     }
 }
