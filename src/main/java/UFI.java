@@ -40,6 +40,7 @@ public class UFI extends Application {
 
     protected static byte defaultForgeVersion;
     protected static boolean customForgeLaunch;
+    protected static String minecraftFolder;
 
     public static void main(String[] args) {
         launch(args);
@@ -244,8 +245,14 @@ public class UFI extends Application {
             defaultForgeVersion = 0;
             customForgeLaunch = true;
 
+            if (System.getProperty("os.name").toLowerCase().contains("win")){
+                minecraftFolder = String.valueOf(new File(System.getenv("APPDATA"), ".minecraft"));
+            } else {
+                minecraftFolder = String.valueOf(new File(System.getProperty("user.home"), ".minecraft"));
+            }
+
             try (FileWriter writer = new FileWriter(file)) {
-                writer.write(String.format("defaultForgeVersionByte=0%ncustomForgeLaunch=true"));
+                writer.write(String.format("defaultForgeVersionByte=0%ncustomForgeLaunch=true%nminecraftFolder=%s", minecraftFolder));
             }
 
             System.out.println("| Settings file created: " + path);

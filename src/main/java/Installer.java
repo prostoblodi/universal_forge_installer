@@ -53,7 +53,7 @@ abstract class Installer implements Runnable {
 
     // Download and run Forge
     protected static void download_forge(String minecraftVersion, Pair<String, Byte> forgeVersionPair) throws IOException, URISyntaxException {
-        Path forgeJarsDir = Paths.get(System.getProperty("user.dir"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
+        Path forgeJarsDir = Paths.get(System.getProperty("user.home"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
         Path filePath;
 
         String forgeVersion = forgeVersionPair.getKey();

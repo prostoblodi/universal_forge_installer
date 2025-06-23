@@ -94,7 +94,6 @@ class Settings {
         stage.setScene(scene);
     }
 
-
     protected void show() {
         stage.show();
     }
@@ -191,6 +190,5 @@ class Settings {
 
         return hbox;
     }
-
 
 }
