@@ -42,6 +42,9 @@ public class UFI extends Application {
     protected static boolean customForgeLaunch;
     protected static String minecraftFolder;
 
+    protected static String settingsPath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.settings"));
+    protected static File settingsFile = new File(settingsPath);
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -236,11 +239,8 @@ public class UFI extends Application {
     private static void checkSettings() throws IOException {
         System.out.println("Г Checking settings...");
 
-        String path = String.valueOf(Paths.get(System.getProperty("user.dir"), "UFI", "UFI.settings"));
-        File file = new File(path);
-
-        if (!file.exists()) {
-            System.out.println("| Settings file do not exists at " + path);
+        if (!settingsFile.exists()) {
+            System.out.println("| Settings file do not exists at " + settingsPath);
 
             defaultForgeVersion = 0;
             customForgeLaunch = true;
@@ -251,15 +251,13 @@ public class UFI extends Application {
                 minecraftFolder = String.valueOf(new File(System.getProperty("user.home"), ".minecraft"));
             }
 
-            try (FileWriter writer = new FileWriter(file)) {
-                writer.write(String.format("defaultForgeVersionByte=0%ncustomForgeLaunch=true%nminecraftFolder=%s", minecraftFolder));
-            }
+            updateSettingsFile();
 
-            System.out.println("| Settings file created: " + path);
+            System.out.println("| Settings file created: " + settingsPath);
         } else {
-            System.out.println("| Settings file already exists at " + path);
+            System.out.println("| Settings file already exists at " + settingsPath);
 
-            List<String> lines = Files.readAllLines(Paths.get(path));
+            List<String> lines = Files.readAllLines(Paths.get(settingsPath));
             for (String line : lines) {
                 if (line.contains("defaultForgeVersionByte")){
                     String[] data = line.split("=");
@@ -267,10 +265,19 @@ public class UFI extends Application {
                 } else if (line.contains("customForgeLaunch")){
                     String[] data = line.split("=");
                     customForgeLaunch = Boolean.parseBoolean(data[1]);
+                } else if (line.contains("minecraftFolder")){
+                    String[] data = line.split("=");
+                    minecraftFolder = data[1];
                 }
             }
         }
+        System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%nL minecraftFolder: %s%n%n", defaultForgeVersion, customForgeLaunch, minecraftFolder);
+    }
 
-        System.out.printf("L Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b%n%n", defaultForgeVersion, customForgeLaunch);
+    protected static void updateSettingsFile() throws IOException {
+        try (FileWriter writer = new FileWriter(settingsFile)) {
+            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s",
+                                        defaultForgeVersion, customForgeLaunch, minecraftFolder));
+        }
     }
 }

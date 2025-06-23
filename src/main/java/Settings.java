@@ -17,6 +17,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,6 +49,7 @@ class Settings {
 
         setStyles();
         initialize();
+        setActions();
 
         minecraftFolderButton.setOnAction((_) -> minecraftFolderField.setText(String.valueOf(new DirectoryChooser().showDialog(new Stage()))));
 
@@ -106,10 +108,43 @@ class Settings {
         chooseDefaultForgeVersion.getStyleClass().add("combo-box");
     }
 
+    private void setActions () {
+        chooseDefaultForgeVersion.setOnAction((_) -> {
+            UFI.defaultForgeVersion = chooseDefaultForgeVersion.getValue().getValue();
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        enableCustomLaunch.setOnAction((_) -> {
+            UFI.customForgeLaunch = enableCustomLaunch.getValue().getValue();
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        minecraftFolderField.setOnAction((_) -> {
+            UFI.minecraftFolder = minecraftFolderField.getText();
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     private void initialize(){
         Tooltip tooltip = new Tooltip();
         tooltip.textProperty().bind(minecraftFolderField.textProperty());
         Tooltip.install(minecraftFolderField, tooltip);
+
+        minecraftFolderField.setText(UFI.minecraftFolder);
+        chooseDefaultForgeVersion.setValue(defaultForgeVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultForgeVersion)).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
+        enableCustomLaunch.setValue(customLaunches.stream().filter(pair -> pair.getValue().equals(UFI.customForgeLaunch)).findFirst().orElse(new Pair<>("Unknown", null)));
 
         minecraftFolderField.setOnContextMenuRequested(Event::consume);
 
@@ -119,7 +154,6 @@ class Settings {
 
     private void initializeDefaultForgeVersionChooser(){
         chooseDefaultForgeVersion.getItems().addAll(defaultForgeVersions);
-        chooseDefaultForgeVersion.setValue(defaultForgeVersions.getFirst());
 
         chooseDefaultForgeVersion.setCellFactory(_ -> new ListCell<>() {
             @Override
@@ -148,7 +182,6 @@ class Settings {
 
     private void initializeEnableCustomForgeLaunch(){
         enableCustomLaunch.getItems().addAll(customLaunches);
-        enableCustomLaunch.setValue(customLaunches.getFirst());
 
         enableCustomLaunch.setCellFactory(_ -> new ListCell<>() {
             @Override
@@ -157,7 +190,7 @@ class Settings {
                 if (item == null || empty) {
                     setText(null);
                 } else {
-                    setText(item.getKey()); // Отображаем только название версии
+                    setText(item.getKey());
                 }
             }
         });
@@ -169,7 +202,7 @@ class Settings {
                 if (item == null || empty) {
                     setText(null);
                 } else {
-                    setText(item.getKey()); // Отображаем название версии
+                    setText(item.getKey());
                 }
             }
         });
