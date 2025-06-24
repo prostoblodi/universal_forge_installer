@@ -51,7 +51,7 @@ abstract class Installer implements Runnable {
         return versions;
     }
 
-    // Download and run Forge
+    // Download Forge
     protected static void download_forge(String minecraftVersion, Pair<String, Byte> forgeVersionPair) throws IOException, URISyntaxException {
         Path forgeJarsDir = Paths.get(System.getProperty("user.home"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
         Path filePath;
@@ -103,6 +103,7 @@ abstract class Installer implements Runnable {
         if (howOldIndex(minecraftVersion) == 2) {run_forge(filePath, fileName);}
     }
 
+    // Run Forge
     private static void run_forge(Path filePath, String fileName) {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
@@ -133,6 +134,17 @@ abstract class Installer implements Runnable {
         }
     }
 
+    /**
+     * Determines the "age index" of a Minecraft version based on the provided version string.
+     *
+     * @param minecraftVersion the version string in the format "x.y.z" (e.g., "1.5.2").
+     * @return a byte representing the "age index" of the version:
+     *         <ul>
+     *           <li><code>2</code> for versions newer than or equal to 1.5.2</li>
+     *           <li><code>1</code> for versions 1.4.x, 1.5.x, or 1.3.2</li>
+     *           <li><code>0</code> for older versions</li>
+     *         </ul>
+     */
     protected static byte howOldIndex(String minecraftVersion){
         String[] versionStringParsed = minecraftVersion.split("\\.");
         int[] versionParsed = new int[versionStringParsed.length];
@@ -148,7 +160,6 @@ abstract class Installer implements Runnable {
         } else {
             return (byte) 0;
         }
-
     }
 
     // Main method for testing purposes

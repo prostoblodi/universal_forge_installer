@@ -19,6 +19,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,6 +29,7 @@ public class UFI extends Application {
 
     private static String minecraftVersion = "";
     private static Pair<String, Byte> forgeVersion = new Pair<>("", (byte) -1);
+    private final HashMap<String, List<Pair<String, Byte>>> minecraftToForgeVersions = new HashMap<>();
 
     private final Label mainLabel = new Label("Universal Forge Installer");
     private final Label minecraftVersionLabel = new Label("Minecraft version: ");
@@ -155,11 +157,17 @@ public class UFI extends Application {
     }
 
     private void updateForgeVersions() throws IOException {
-        List<Pair<String, Byte>> assetClasses = getForgeVersions();
+        List<Pair<String, Byte>> assetClasses = minecraftToForgeVersions.get(minecraftVersion) != null ? minecraftToForgeVersions.get(minecraftVersion) : getForgeVersions();
+        System.out.println(minecraftToForgeVersions);
+        System.out.println(assetClasses);
 
         Platform.runLater(() -> {
             chooseForgeVersion.getItems().setAll(assetClasses);
             chooseForgeVersion.setValue(assetClasses.getFirst());
+
+            minecraftToForgeVersions.putIfAbsent(minecraftVersion, assetClasses);
+            System.out.println(minecraftToForgeVersions);
+            System.out.println(assetClasses);
 
             chooseForgeVersion.setCellFactory(_ -> new ListCell<>() {
                 @Override
@@ -204,22 +212,21 @@ public class UFI extends Application {
         return assetClasses;
     }
 
-    /** Method that assigns a value to the status label
+    /**
+     * Updates the status label based on the provided status code.
      *
-     * @param status number that determines which status to set according to this logic:
-     * <ul>
-     *      <li>0 - idle(nothing)</li>
-     *      <li>1 - downloading</li>
-     *      <li>2 - downloaded</li>
-     *      <li>3 - minecraft versions are receiving</li>
-     *      <li>4 - forge versions are receiving</li>
-     *      <li>5 - error</li>
-     *      <li>6 - if the user clicks download without selecting a version</li>
-     *      <li>7 - forge is installing</li>
-     *      <li>8 - forge is installed</li>
-     * </ul>
+     * @param status the status code indicating the current operation:
+     *               <ul>
+     *                 <li><code>0</code>: Idle</li>
+     *                 <li><code>1</code>: Downloading</li>
+     *                 <li><code>2</code>: Downloaded</li>
+     *                 <li><code>3</code>: Receiving Minecraft versions</li>
+     *                 <li><code>4</code>: Receiving Forge versions</li>
+     *                 <li><code>5</code>: Error occurred</li>
+     *                 <li><code>6</code>: Installing</li>
+     *                 <li><code>7</code>: Installed</li>
+     *               </ul>
      */
-
     protected static void updateStatusLabel(byte status) {
         Platform.runLater(() -> {
             switch (status) {
