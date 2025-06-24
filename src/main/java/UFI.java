@@ -37,7 +37,7 @@ public class UFI extends Application {
     private static final Label statusLabel = new Label("");
     private static final SimpleStringProperty textProperty = new SimpleStringProperty("");
 
-    private final Button downloadButton = new Button("Download & Launch");
+    protected static final Button downloadButton = new Button("Download & Launch");
     private final Button settingsButton = new Button("Settings");
 
     protected static byte defaultForgeVersion;
@@ -127,7 +127,16 @@ public class UFI extends Application {
                     new Thread(() -> {
                         try {
                             Installer.download_forge(minecraftVersion, forgeVersion);
-                            Platform.runLater(() -> updateStatusLabel((byte) 2));
+                            Platform.runLater(() -> {
+                                updateStatusLabel((byte) 2);
+                                if (Installer.howOldIndex(minecraftVersion) >= 1) {
+                                    updateStatusLabel((byte) 6);
+                                    new Thread(() -> {
+                                        Installer.run_forge();
+                                        Platform.runLater(() -> updateStatusLabel((byte) 7));
+                                    }).start();
+                                }
+                            });
                         } catch (IOException | URISyntaxException e) {
                             UFI.updateStatusLabel((byte) 5);
                             throw new RuntimeException(e);
@@ -279,6 +288,11 @@ public class UFI extends Application {
             }
         }
         System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%nL minecraftFolder: %s%n%n", defaultForgeVersion, customForgeLaunch, minecraftFolder);
+        if (customForgeLaunch) {
+            downloadButton.setText("Download & Install");
+        } else {
+            downloadButton.setText("Download & Launch");
+        }
     }
 
     protected static void updateSettingsFile() throws IOException {

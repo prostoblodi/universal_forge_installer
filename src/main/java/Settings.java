@@ -122,12 +122,17 @@ class Settings {
             UFI.customForgeLaunch = enableCustomLaunch.getValue().getValue();
             try {
                 UFI.updateSettingsFile();
+                if (enableCustomLaunch.getValue().getValue()) {
+                    UFI.downloadButton.setText("Download & Install");
+                } else {
+                    UFI.downloadButton.setText("Download & Launch");
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         });
 
-        minecraftFolderField.setOnAction((_) -> {
+        minecraftFolderField.textProperty().addListener((_, _, _) -> {
             UFI.minecraftFolder = minecraftFolderField.getText();
             try {
                 UFI.updateSettingsFile();
@@ -137,7 +142,7 @@ class Settings {
         });
     }
 
-    private void initialize(){
+    private void initialize() {
         Tooltip tooltip = new Tooltip();
         tooltip.textProperty().bind(minecraftFolderField.textProperty());
         Tooltip.install(minecraftFolderField, tooltip);
@@ -152,7 +157,7 @@ class Settings {
         initializeDefaultForgeVersionChooser();
     }
 
-    private void initializeDefaultForgeVersionChooser(){
+    private void initializeDefaultForgeVersionChooser() {
         chooseDefaultForgeVersion.getItems().addAll(defaultForgeVersions);
 
         chooseDefaultForgeVersion.setCellFactory(_ -> new ListCell<>() {
@@ -180,7 +185,7 @@ class Settings {
         });
     }
 
-    private void initializeEnableCustomForgeLaunch(){
+    private void initializeEnableCustomForgeLaunch() {
         enableCustomLaunch.getItems().addAll(customLaunches);
 
         enableCustomLaunch.setCellFactory(_ -> new ListCell<>() {

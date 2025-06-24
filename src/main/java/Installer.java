@@ -16,6 +16,9 @@ import org.jsoup.select.Elements;
 
 abstract class Installer implements Runnable {
 
+    private static String fileName;
+    private static Path filePath;
+
     // Return all versions of Minecraft for which Forge is available
     protected static List<String> getMinecraftVersionsForForge() throws IOException {
         List<String> versions = new ArrayList<>();
@@ -54,10 +57,8 @@ abstract class Installer implements Runnable {
     // Download Forge
     protected static void download_forge(String minecraftVersion, Pair<String, Byte> forgeVersionPair) throws IOException, URISyntaxException {
         Path forgeJarsDir = Paths.get(System.getProperty("user.home"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
-        Path filePath;
 
         String forgeVersion = forgeVersionPair.getKey();
-        String fileName;
 
         Document document = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
         Elements downloadLinks;
@@ -99,37 +100,47 @@ abstract class Installer implements Runnable {
 
         System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
         System.out.printf("Download took %d milliseconds (%.2f seconds)%n", duration, duration / 1000.0);
-
-        if (howOldIndex(minecraftVersion) == 2) {run_forge(filePath, fileName);}
     }
 
     // Run Forge
-    private static void run_forge(Path filePath, String fileName) {
+    protected static void run_forge() {
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
-        // .
+        // some comment that prevents from "It's possible to extract method returning 'command' from a long surrounding method"
         String[] command;
 
         final String reducedPath = filePath.getParent().toString();
         final String modifiedFileName = String.format("'%s'", fileName);
+
+        String args = "";
+        if(UFI.customForgeLaunch){args = String.format(" --installClient %s", UFI.minecraftFolder);}
+
         if (isWindows) {
             command = new String[]{
                     "cmd", "/c",
-                    "cd /d " + reducedPath + " && java -jar " + modifiedFileName
+                    "cd /d " + reducedPath + " && java -jar " + modifiedFileName + args
             };
         } else {
             command = new String[]{
                     "bash", "-c",
-                    "cd " + reducedPath + " && java -jar " + modifiedFileName
+                    "cd " + reducedPath + " && java -jar " + modifiedFileName + args
             };
         }
 
         try {
-            new ProcessBuilder(command)
-                    .inheritIO()
-                    .start();
-            System.out.println("Forge file launched!");
-        } catch (IOException e) {
+            if (UFI.customForgeLaunch){
+                new ProcessBuilder(command)
+                        .inheritIO()
+                        .start()
+                        .waitFor();
+                System.out.println("Forge installed!");
+            } else {
+                new ProcessBuilder(command)
+                        .inheritIO()
+                        .start();
+                System.out.println("Forge file launched!");
+            }
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
