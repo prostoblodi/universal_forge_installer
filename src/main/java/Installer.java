@@ -21,6 +21,8 @@ abstract class Installer implements Runnable {
 
     private static Document forgePageDocument;
 
+    private static final HashMap<String, List<String>> minecraftToSpecifiedForgeVersions = new HashMap<>();
+
     // Return all versions of Minecraft for which Forge is available
     protected static List<String> getMinecraftVersionsForForge() throws IOException {
         List<String> versions = new ArrayList<>();
@@ -52,14 +54,19 @@ abstract class Installer implements Runnable {
 
         Elements tds = document.select(".download-version");
 
-        specificalVersions.add(tds.select("td:has(i.promo-latest)").text());
-        specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text() : tds.select("td:has(i.promo-latest)").text());
-
         for (Element td : tds) {
             versions.add(td.text().trim());
         }
 
-        specificalVersions.add(versions.getLast());
+        if (minecraftToSpecifiedForgeVersions.get(minecraftVersion) == null) {
+            specificalVersions.add(tds.select("td:has(i.promo-latest)").text());
+            specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text() : tds.select("td:has(i.promo-latest)").text());
+            specificalVersions.add(versions.getLast());
+        } else {
+            specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst());
+            specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1));
+            specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast());
+        }
 
         output.add(versions);
         output.add(specificalVersions);

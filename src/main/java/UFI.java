@@ -32,7 +32,6 @@ public class UFI extends Application {
     private static List<String> specifiedForgeVersions;
 
     private final HashMap<String, List<Pair<String, Byte>>> minecraftToForgeVersions = new HashMap<>();
-    private final HashMap<String, List<String>> minecraftToSpecifiedForgeVersions = new HashMap<>();
 
     private final Label mainLabel = new Label("Universal Forge Installer");
     private final Label minecraftVersionLabel = new Label("Minecraft version: ");
@@ -174,10 +173,6 @@ public class UFI extends Application {
         Platform.runLater(() -> {
             chooseForgeVersion.getItems().setAll(assetClasses);
 
-            System.out.println("Содержимое assetClasses: " + assetClasses);
-            System.out.println("Ищем ключ: " + specifiedForgeVersions.getFirst());
-            System.out.println(defaultForgeVersion);
-
             if (defaultForgeVersion == 0) {
                 System.out.println(1);
                 chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(specifiedForgeVersions.get(1))).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
@@ -224,8 +219,8 @@ public class UFI extends Application {
 
     private List<Pair<String, Byte>> getForgeVersions() throws IOException {
         updateStatusLabel((byte) 4);
-        List<List<String>> output = Installer.getForgeVersionsForMinecraft(minecraftVersion);
 
+        List<List<String>> output = Installer.getForgeVersionsForMinecraft(minecraftVersion);
         List<Pair<String, Byte>> assetClasses = new ArrayList<>();
 
         List<String> versions = output.getFirst();
@@ -265,7 +260,7 @@ public class UFI extends Application {
                 case 6 -> textProperty.set("Installing...");
                 case 7 -> textProperty.set("Installed!");
             }
-            System.out.println("Current status: " + textProperty.get());
+            System.out.println("Current status: " + (textProperty.get().isEmpty() ? "idle(nothing)" : textProperty.get()));
         });
     }
 
@@ -304,7 +299,9 @@ public class UFI extends Application {
                 }
             }
         }
+
         System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%nL minecraftFolder: %s%n%n", defaultForgeVersion, customForgeLaunch, minecraftFolder);
+
         if (customForgeLaunch) {
             downloadButton.setText("Download & Install");
         } else {
