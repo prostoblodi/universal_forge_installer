@@ -19,6 +19,8 @@ abstract class Installer implements Runnable {
     private static String fileName;
     private static Path filePath;
 
+    private static Document forgePageDocument;
+
     // Return all versions of Minecraft for which Forge is available
     protected static List<String> getMinecraftVersionsForForge() throws IOException {
         List<String> versions = new ArrayList<>();
@@ -36,22 +38,34 @@ abstract class Installer implements Runnable {
     }
 
     // Return all versions of Forge available for the entered Minecraft version
-    protected static List<String> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
+    protected static List<List<String>> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
+        List<List<String>> output = new ArrayList<>();
         List<String> versions = new ArrayList<>();
+        List<String> specificalVersions = new ArrayList<>();
 
         if (Objects.equals(minecraftVersion, "")) {
-            return versions;
+            return output;
         }
 
         Document document = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
+        forgePageDocument = document;
+
         Elements tds = document.select(".download-version");
+
+        specificalVersions.add(tds.select("td:has(i.promo-latest)").text());
+        specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text() : tds.select("td:has(i.promo-latest)").text());
 
         for (Element td : tds) {
             versions.add(td.text().trim());
         }
 
-        System.out.println("Versions of Forge successfully received: " + versions);
-        return versions;
+        specificalVersions.add(versions.getLast());
+
+        output.add(versions);
+        output.add(specificalVersions);
+
+        System.out.println("Versions of Forge successfully received: " + output);
+        return output;
     }
 
     // Download Forge
@@ -60,7 +74,6 @@ abstract class Installer implements Runnable {
 
         String forgeVersion = forgeVersionPair.getKey();
 
-        Document document = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
         Elements downloadLinks;
 
         byte howOldIndex = howOldIndex(minecraftVersion);
@@ -72,10 +85,10 @@ abstract class Installer implements Runnable {
 
         if (howOldIndex == 2) {
             fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
-            downloadLinks = document.select("a:contains(Installer)");
+            downloadLinks = forgePageDocument.select("a:contains(Installer)");
         } else {
-            if (howOldIndex == 1){downloadLinks = document.select("a:contains(Universal)");}
-            else {downloadLinks = document.select("a:contains(Client)");}
+            if (howOldIndex == 1){downloadLinks = forgePageDocument.select("a:contains(Universal)");}
+            else {downloadLinks = forgePageDocument.select("a:contains(Client)");}
             fileName = String.format("Forge_%s_%s.zip", forgeVersion, minecraftVersion);
         }
 
@@ -104,10 +117,8 @@ abstract class Installer implements Runnable {
 
     // Run Forge
     protected static void run_forge() {
-        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-
-        // some comment that prevents from "It's possible to extract method returning 'command' from a long surrounding method"
         String[] command;
+        boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
         final String reducedPath = filePath.getParent().toString();
         final String modifiedFileName = String.format("'%s'", fileName);
@@ -156,7 +167,7 @@ abstract class Installer implements Runnable {
      *           <li><code>0</code> for older versions</li>
      *         </ul>
      */
-    protected static byte howOldIndex(String minecraftVersion){
+    protected static byte howOldIndex(String minecraftVersion) {
         String[] versionStringParsed = minecraftVersion.split("\\.");
         int[] versionParsed = new int[versionStringParsed.length];
 
@@ -172,16 +183,4 @@ abstract class Installer implements Runnable {
             return (byte) 0;
         }
     }
-
-    // Main method for testing purposes
-//    public static void main(String[] args) throws IOException {
-// //        System.out.println(getForgeVersionsForMinecraft("1.21.1"));
-// //        System.out.println(getMinecraftVersionsForForge());
-// //        download_forge("1.17.1", "37.1.1");
-// //           try {
-// //               Runtime.getRuntime().exec("usr/lib/jvm/java-24-openjdk/bin/java --version");
-// //           } catch (Exception e) {
-// //               System.out.println(e);
-// //           }
-//    }
 }
