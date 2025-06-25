@@ -21,7 +21,7 @@ abstract class Installer implements Runnable {
 
     private static Document forgePageDocument;
 
-    private static final HashMap<String, List<String>> minecraftToSpecifiedForgeVersions = new HashMap<>();
+    protected static final HashMap<String, List<String>> minecraftToSpecifiedForgeVersions = new HashMap<>();
 
     // Return all versions of Minecraft for which Forge is available
     protected static List<String> getMinecraftVersionsForForge() throws IOException {
@@ -35,18 +35,17 @@ abstract class Installer implements Runnable {
             versions.add(a.text().trim());
         }
 
-        System.out.println("Versions of Minecraft successfully received: " + versions);
+        System.out.printf("%n***%nVersions of Minecraft successfully received: " + versions + "%n***%n%n");
         return versions;
     }
 
     // Return all versions of Forge available for the entered Minecraft version
-    protected static List<List<String>> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
-        List<List<String>> output = new ArrayList<>();
+    protected static List<String> getForgeVersionsForMinecraft(String minecraftVersion) throws IOException {
         List<String> versions = new ArrayList<>();
         List<String> specificalVersions = new ArrayList<>();
 
         if (Objects.equals(minecraftVersion, "")) {
-            return output;
+            return versions;
         }
 
         Document document = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
@@ -62,17 +61,15 @@ abstract class Installer implements Runnable {
             specificalVersions.add(tds.select("td:has(i.promo-latest)").text());
             specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text() : tds.select("td:has(i.promo-latest)").text());
             specificalVersions.add(versions.getLast());
+            minecraftToSpecifiedForgeVersions.put(minecraftVersion, specificalVersions);
         } else {
             specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst());
             specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1));
             specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast());
         }
 
-        output.add(versions);
-        output.add(specificalVersions);
-
-        System.out.println("Versions of Forge successfully received: " + output);
-        return output;
+        System.out.printf("%n***%nVersions of Forge successfully received: " + versions + "%n***%n%n");
+        return versions;
     }
 
     // Download Forge

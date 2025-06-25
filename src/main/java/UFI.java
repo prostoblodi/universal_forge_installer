@@ -29,7 +29,6 @@ public class UFI extends Application {
 
     private static String minecraftVersion = "";
     private static Pair<String, Byte> forgeVersion = new Pair<>("", (byte) -1);
-    private static List<String> specifiedForgeVersions;
 
     private final HashMap<String, List<Pair<String, Byte>>> minecraftToForgeVersions = new HashMap<>();
 
@@ -153,13 +152,12 @@ public class UFI extends Application {
     private void saveMinecraftVersion() throws IOException {
         minecraftVersion = chooseMinecraftVersion.getValue();
         updateForgeVersions();
-        System.out.println("Saved minecraft version as: " + minecraftVersion);
+        System.out.println("* Saved minecraft version as: " + minecraftVersion);
     }
 
     private void saveForgeVersion() {
-        updateStatusLabel((byte) 0);
         forgeVersion = chooseForgeVersion.getValue();
-        System.out.println("Saved forge version as: " + forgeVersion);
+        System.out.println("* Saved forge version as: " + forgeVersion);
     }
 
     private void showMinecraftVersions() throws IOException {
@@ -173,15 +171,10 @@ public class UFI extends Application {
         Platform.runLater(() -> {
             chooseForgeVersion.getItems().setAll(assetClasses);
 
-            if (defaultForgeVersion == 0) {
-                System.out.println(1);
-                chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(specifiedForgeVersions.get(1))).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
-            } else if (defaultForgeVersion == 1) {
-                System.out.println(2);
-                chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(specifiedForgeVersions.getFirst())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
-            } else if (defaultForgeVersion == 2){
-                System.out.println(3);
-                chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(specifiedForgeVersions.getLast())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
+            switch (defaultForgeVersion) {
+                case 0 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Installer.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1))).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
+                case 1 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Installer.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
+                case 2 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Installer.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
             }
 
             minecraftToForgeVersions.putIfAbsent(minecraftVersion, assetClasses);
@@ -193,7 +186,7 @@ public class UFI extends Application {
                     if (item == null || empty) {
                         setText(null);
                     } else {
-                        setText(item.getKey()); // Отображаем только название версии
+                        setText(item.getKey());
                     }
                 }
             });
@@ -205,7 +198,7 @@ public class UFI extends Application {
                     if (item == null || empty) {
                         setText(null);
                     } else {
-                        setText(item.getKey()); // Отображаем название версии
+                        setText(item.getKey());
                     }
                 }
             });
@@ -220,14 +213,11 @@ public class UFI extends Application {
     private List<Pair<String, Byte>> getForgeVersions() throws IOException {
         updateStatusLabel((byte) 4);
 
-        List<List<String>> output = Installer.getForgeVersionsForMinecraft(minecraftVersion);
+        List<String> output = Installer.getForgeVersionsForMinecraft(minecraftVersion);
         List<Pair<String, Byte>> assetClasses = new ArrayList<>();
 
-        List<String> versions = output.getFirst();
-        specifiedForgeVersions = output.getLast();
-
-        for (String version : versions) {
-            assetClasses.add(new Pair<>(version, (byte) versions.indexOf(version)));
+        for (String version : output) {
+            assetClasses.add(new Pair<>(version, (byte) output.indexOf(version)));
         }
 
         return assetClasses;

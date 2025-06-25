@@ -45,13 +45,19 @@ class Settings {
     private final Stage stage = new Stage();
 
     public Settings() {
+        System.out.println("@ Settings launched!");
+
         Button minecraftFolderButton = new Button("...");
 
         setStyles();
         initialize();
         setActions();
 
-        minecraftFolderButton.setOnAction((_) -> minecraftFolderField.setText(String.valueOf(new DirectoryChooser().showDialog(new Stage()))));
+        minecraftFolderButton.setOnAction((_) -> {
+            String s = String.valueOf(new DirectoryChooser().showDialog(new Stage()));
+            if (Objects.equals(s, "null")){s = "";}
+            minecraftFolderField.setText(s);
+        });
 
         VBox defaultForgeVersionLabelBox = new VBox();
         defaultForgeVersionLabelBox.getChildren().add(defaultForgeVersionLabel);
@@ -111,6 +117,8 @@ class Settings {
     private void setActions () {
         chooseDefaultForgeVersion.setOnAction((_) -> {
             UFI.defaultForgeVersion = chooseDefaultForgeVersion.getValue().getValue();
+            System.out.println("@ Default forge version changed to: " + UFI.defaultForgeVersion);
+
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
@@ -120,6 +128,8 @@ class Settings {
 
         enableCustomLaunch.setOnAction((_) -> {
             UFI.customForgeLaunch = enableCustomLaunch.getValue().getValue();
+            System.out.println("@ Forge custom launch changed to: " + UFI.customForgeLaunch);
+
             try {
                 UFI.updateSettingsFile();
                 if (enableCustomLaunch.getValue().getValue()) {
@@ -134,6 +144,8 @@ class Settings {
 
         minecraftFolderField.textProperty().addListener((_, _, _) -> {
             UFI.minecraftFolder = minecraftFolderField.getText();
+            System.out.println("@ Minecraft folder changed to: " + UFI.minecraftFolder);
+
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
@@ -228,5 +240,4 @@ class Settings {
 
         return hbox;
     }
-
 }
