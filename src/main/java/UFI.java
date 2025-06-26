@@ -41,6 +41,7 @@ public class UFI extends Application {
     protected static final Button downloadButton = new Button("Download & Launch");
     private final Button settingsButton = new Button("Settings");
 
+    protected static byte defaultMinecraftVersion;
     protected static byte defaultForgeVersion;
     protected static boolean customForgeLaunch;
     protected static String minecraftFolder;
@@ -162,7 +163,12 @@ public class UFI extends Application {
 
     private void showMinecraftVersions() throws IOException {
         List<String> assetClasses = getMinecraftVersions();
-        Platform.runLater(() -> chooseMinecraftVersion.getItems().addAll(assetClasses));
+        Platform.runLater(() -> {
+            chooseMinecraftVersion.getItems().addAll(assetClasses);
+            if (defaultMinecraftVersion == 1){
+                chooseMinecraftVersion.setValue(assetClasses.getFirst());
+            }
+        });
     }
 
     private void updateForgeVersions() throws IOException {
@@ -260,6 +266,7 @@ public class UFI extends Application {
         if (!settingsFile.exists()) {
             System.out.println("| Settings file do not exists at " + settingsPath);
 
+            defaultMinecraftVersion = 0;
             defaultForgeVersion = 0;
             customForgeLaunch = true;
 
@@ -294,6 +301,9 @@ public class UFI extends Application {
                             minecraftFolder = String.valueOf(new File(System.getProperty("user.home"), ".minecraft"));
                         }
                     }
+                } else if (line.contains("defaultMinecraftVersion")){
+                    String[] data = line.split("=");
+                    defaultMinecraftVersion = Byte.parseByte(data[1]);
                 }
             }
         }
@@ -309,8 +319,8 @@ public class UFI extends Application {
 
     protected static void updateSettingsFile() throws IOException {
         try (FileWriter writer = new FileWriter(settingsFile)) {
-            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s",
-                                        defaultForgeVersion, customForgeLaunch, minecraftFolder));
+            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersion=%d",
+                                        defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultMinecraftVersion));
         }
     }
 }

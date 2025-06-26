@@ -24,6 +24,15 @@ import java.util.Objects;
 class Settings {
     private final Label mainLabel = new Label("Settings");
 
+    private final Label defaultMinecraftVersionLabel = new Label("Default minecraft version:");
+    private final ComboBox<Pair<String, Byte>> defaultMinecraftVersionChoose = new ComboBox<>();
+    private final List<Pair<String, Byte>> defaultMinecraftVersions = List.of(
+            new Pair<>("None", (byte) 0),
+            new Pair<>("Newest", (byte) 1),
+            new Pair<>("Last used", (byte) 2)
+    );
+
+
     private final Label defaultForgeVersionLabel = new Label("Default forge version:");
     private final ComboBox<Pair<String, Byte>> chooseDefaultForgeVersion = new ComboBox<>();
     private final List<Pair<String, Byte>> defaultForgeVersions = List.of(
@@ -59,6 +68,10 @@ class Settings {
             minecraftFolderField.setText(s);
         });
 
+        VBox defaultMinecraftVersionLabelBox = new VBox();
+        defaultMinecraftVersionLabelBox.getChildren().add(defaultMinecraftVersionLabel);
+        defaultMinecraftVersionLabelBox.setAlignment(Pos.CENTER_LEFT);
+
         VBox defaultForgeVersionLabelBox = new VBox();
         defaultForgeVersionLabelBox.getChildren().add(defaultForgeVersionLabel);
         defaultForgeVersionLabelBox.setAlignment(Pos.CENTER_LEFT);
@@ -73,6 +86,10 @@ class Settings {
         folderChoose.setAlignment(Pos.CENTER);
         folderChoose.setSpacing(10);
 
+        VBox defaultMinecraftVersionChooserBox = new VBox();
+        defaultMinecraftVersionChooserBox.getChildren().add(defaultMinecraftVersionChoose);
+        defaultMinecraftVersionChooserBox.setAlignment(Pos.CENTER_RIGHT);
+
         VBox defaultForgeVersionChooserBox = new VBox();
         defaultForgeVersionChooserBox.getChildren().add(chooseDefaultForgeVersion);
         defaultForgeVersionChooserBox.setAlignment(Pos.CENTER_RIGHT);
@@ -82,17 +99,22 @@ class Settings {
         customForgeLaunchChoosersBox.setAlignment(Pos.CENTER_RIGHT);
         customForgeLaunchChoosersBox.setSpacing(10);
 
+        HBox defaultMinecraftVersionFullBox = new HBox();
+        defaultMinecraftVersionFullBox.getChildren().addAll(defaultMinecraftVersionLabelBox, new Region(), defaultMinecraftVersionChooserBox);
+        HBox.setHgrow(defaultMinecraftVersionFullBox.getChildren().get(1), Priority.ALWAYS);
+        defaultMinecraftVersionFullBox.setAlignment(Pos.CENTER);
+
         HBox defaultForgeVersionFullBox = new HBox();
         defaultForgeVersionFullBox.getChildren().addAll(defaultForgeVersionLabelBox, new Region(), defaultForgeVersionChooserBox);
         HBox.setHgrow(defaultForgeVersionFullBox.getChildren().get(1), Priority.ALWAYS);
-        defaultForgeVersionFullBox.setAlignment(Pos.CENTER_LEFT);
+        defaultForgeVersionFullBox.setAlignment(Pos.CENTER);
 
         HBox customForgeLaunchFullBox = new HBox();
         customForgeLaunchFullBox.getChildren().addAll(customForgeLaunchLabelsBox, new Region(), customForgeLaunchChoosersBox);
         HBox.setHgrow(customForgeLaunchFullBox.getChildren().get(1), Priority.ALWAYS);
-        customForgeLaunchFullBox.setAlignment(Pos.CENTER_LEFT);
+        customForgeLaunchFullBox.setAlignment(Pos.CENTER);
 
-        VBox windowLayout = new VBox(mainLabel, defaultForgeVersionFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox);
+        VBox windowLayout = new VBox(mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox);
         windowLayout.getStyleClass().add("settings-vbox");
 
         Scene scene = new Scene(windowLayout);
@@ -108,13 +130,28 @@ class Settings {
 
     private void setStyles() {
         mainLabel.getStyleClass().add("label-main");
+
+        defaultMinecraftVersionLabel.getStyleClass().add("settings-label");
         defaultForgeVersionLabel.getStyleClass().add("settings-label");
         enableCustomLaunchLabel.getStyleClass().add("settings-label");
         minecraftFolderChooseLabel.getStyleClass().add("settings-label");
+
+        defaultMinecraftVersionChoose.getStyleClass().add("combo-box");
         chooseDefaultForgeVersion.getStyleClass().add("combo-box");
     }
 
     private void setActions () {
+        defaultMinecraftVersionChoose.setOnAction((_) -> {
+            UFI.defaultMinecraftVersion = defaultMinecraftVersionChoose.getValue().getValue();
+            System.out.println("@ Default minecraft version changed to: " + UFI.defaultMinecraftVersion);
+
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         chooseDefaultForgeVersion.setOnAction((_) -> {
             UFI.defaultForgeVersion = chooseDefaultForgeVersion.getValue().getValue();
             System.out.println("@ Default forge version changed to: " + UFI.defaultForgeVersion);
@@ -161,12 +198,14 @@ class Settings {
 
         minecraftFolderField.setText(UFI.minecraftFolder);
         chooseDefaultForgeVersion.setValue(defaultForgeVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultForgeVersion)).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
+        defaultMinecraftVersionChoose.setValue(defaultMinecraftVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultMinecraftVersion)).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
         enableCustomLaunch.setValue(customLaunches.stream().filter(pair -> pair.getValue().equals(UFI.customForgeLaunch)).findFirst().orElse(new Pair<>("Unknown", null)));
 
         minecraftFolderField.setOnContextMenuRequested(Event::consume);
 
-        initializeEnableCustomForgeLaunch();
+        initializeDefaultMinecraftVersionChooser();
         initializeDefaultForgeVersionChooser();
+        initializeEnableCustomForgeLaunch();
     }
 
     private void initializeDefaultForgeVersionChooser() {
@@ -179,7 +218,7 @@ class Settings {
                 if (item == null || empty) {
                     setText(null);
                 } else {
-                    setText(item.getKey()); // Отображаем только название версии
+                    setText(item.getKey());
                 }
             }
         });
@@ -191,7 +230,35 @@ class Settings {
                 if (item == null || empty) {
                     setText(null);
                 } else {
-                    setText(item.getKey()); // Отображаем название версии
+                    setText(item.getKey());
+                }
+            }
+        });
+    }
+
+    private void initializeDefaultMinecraftVersionChooser() {
+        defaultMinecraftVersionChoose.getItems().addAll(defaultMinecraftVersions);
+
+        defaultMinecraftVersionChoose.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
+                }
+            }
+        });
+
+        defaultMinecraftVersionChoose.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
                 }
             }
         });
