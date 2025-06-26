@@ -46,8 +46,13 @@ public class UFI extends Application {
     protected static boolean customForgeLaunch;
     protected static String minecraftFolder;
 
+    protected static String lastUsedMinecraftVersion;
+
     protected static String settingsPath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.settings"));
     protected static File settingsFile = new File(settingsPath);
+
+    protected static String cachePath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.cache"));
+    protected static File cacheFile = new File(cachePath);
 
     public static void main(String[] args) {
         launch(args);
@@ -59,6 +64,7 @@ public class UFI extends Application {
 
         setLBStyles();
         checkSettings();
+        checkCache();
 
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
@@ -152,7 +158,11 @@ public class UFI extends Application {
 
     private void saveMinecraftVersion() throws IOException {
         minecraftVersion = chooseMinecraftVersion.getValue();
+        lastUsedMinecraftVersion = minecraftVersion;
+
+        updateCacheFile();
         updateForgeVersions();
+
         System.out.println("* Saved minecraft version as: " + minecraftVersion);
     }
 
@@ -167,6 +177,13 @@ public class UFI extends Application {
             chooseMinecraftVersion.getItems().addAll(assetClasses);
             if (defaultMinecraftVersion == 1){
                 chooseMinecraftVersion.setValue(assetClasses.getFirst());
+            } else if (defaultMinecraftVersion == 2 && !Objects.equals(lastUsedMinecraftVersion, "null")){
+                chooseMinecraftVersion.setValue(lastUsedMinecraftVersion);
+                try {
+                    saveMinecraftVersion();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }
@@ -308,7 +325,8 @@ public class UFI extends Application {
             }
         }
 
-        System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%nL minecraftFolder: %s%n%n", defaultForgeVersion, customForgeLaunch, minecraftFolder);
+        System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%nL minecraftFolder: %s, defaultMinecraftVersion: %d%n%n",
+                           defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultForgeVersion);
 
         if (customForgeLaunch) {
             downloadButton.setText("Download & Install");
@@ -317,10 +335,37 @@ public class UFI extends Application {
         }
     }
 
+    private static void checkCache() throws IOException {
+        System.out.println("Г Checking cache...");
+
+        if (!cacheFile.exists()){
+            System.out.println("| Cache file do not exists at " + cachePath);
+            updateCacheFile();
+        } else {
+            System.out.println("| Cache file already exists at " + cachePath);
+
+            List<String> lines = Files.readAllLines(Paths.get(cachePath));
+            for (String line : lines){
+                if (line.contains("defaultMinecraftVersion")){
+                    String[] data = line.split("=");
+                    lastUsedMinecraftVersion = data[1];
+                }
+            }
+        }
+
+        System.out.printf("L Saved cache as: lastUsedMinecraftVersion: %s%n", lastUsedMinecraftVersion);
+    }
+
     protected static void updateSettingsFile() throws IOException {
         try (FileWriter writer = new FileWriter(settingsFile)) {
             writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersion=%d",
                                         defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultMinecraftVersion));
+        }
+    }
+
+    protected static void updateCacheFile() throws IOException {
+        try (FileWriter writer = new FileWriter(cacheFile)){
+            writer.write(String.format("defaultMinecraftVersion=%s", lastUsedMinecraftVersion));
         }
     }
 }
