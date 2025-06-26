@@ -285,7 +285,15 @@ public class UFI extends Application {
                     customForgeLaunch = Boolean.parseBoolean(data[1]);
                 } else if (line.contains("minecraftFolder")){
                     String[] data = line.split("=");
-                    minecraftFolder = data[1];
+                    if (data.length > 1) {
+                        minecraftFolder = data[1];
+                    } else {
+                        if (System.getProperty("os.name").toLowerCase().contains("win")){
+                            minecraftFolder = String.valueOf(new File(System.getenv("APPDATA"), ".minecraft"));
+                        } else {
+                            minecraftFolder = String.valueOf(new File(System.getProperty("user.home"), ".minecraft"));
+                        }
+                    }
                 }
             }
         }
