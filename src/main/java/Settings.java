@@ -51,6 +51,9 @@ class Settings {
     private final Label enableForgeCacheLabel = new Label("Cache forge versions:");
     private final ComboBox<Pair<String, Boolean>> enableForgeCacheChoose = new ComboBox<>();
 
+//    private final Label enableForgeFileCacheLabel = new Label("Cache forge versions to file:");
+//    private final ComboBox<Pair<String, Byte>> enableForgeFileCacheChoose = new ComboBox<>();
+
     private final Label enableCustomLaunchLabel = new Label("Enable custom forge launch: ");
     private final ComboBox<Pair<String, Boolean>> enableCustomLaunch = new ComboBox<>();
 
@@ -74,73 +77,25 @@ class Settings {
             minecraftFolderField.setText(s);
         });
 
-        VBox defaultMinecraftVersionLabelBox = new VBox();
-        defaultMinecraftVersionLabelBox.getChildren().add(defaultMinecraftVersionLabel);
-        defaultMinecraftVersionLabelBox.setAlignment(Pos.CENTER_LEFT);
+        HBox defaultMinecraftVersionFullBox = HBoxGenerator(defaultMinecraftVersionLabel, defaultMinecraftVersionChoose);
+        HBox defaultForgeVersionFullBox = HBoxGenerator(defaultForgeVersionLabel, chooseDefaultForgeVersion);
+        HBox enableForgeCachingFullBox = HBoxGenerator(enableForgeCacheLabel, enableForgeCacheChoose);
+        HBox customForgeLaunchFullBox = HBoxGenerator(enableCustomLaunchLabel, enableCustomLaunch);
 
-        VBox defaultForgeVersionLabelBox = new VBox();
-        defaultForgeVersionLabelBox.getChildren().add(defaultForgeVersionLabel);
-        defaultForgeVersionLabelBox.setAlignment(Pos.CENTER_LEFT);
-
-        VBox customForgeLaunchLabelBox = new VBox();
-        customForgeLaunchLabelBox.getChildren().addAll(enableCustomLaunchLabel, minecraftFolderChooseLabel);
-        customForgeLaunchLabelBox.setAlignment(Pos.CENTER_LEFT);
-        customForgeLaunchLabelBox.setSpacing(15);
-
-        VBox enableForgeCacheLabelBox = new VBox();
-        enableForgeCacheLabelBox.getChildren().add(enableForgeCacheLabel);
-        enableForgeCacheLabelBox.setAlignment(Pos.CENTER_LEFT);
-
-
-        HBox folderChoose = new HBox();
-        folderChoose.getChildren().addAll(minecraftFolderField, minecraftFolderButton);
+        HBox folderChoose = new HBox(minecraftFolderField, minecraftFolderButton);
         folderChoose.setAlignment(Pos.CENTER);
         folderChoose.setSpacing(10);
 
+        VBox folderLabel = new VBox(minecraftFolderChooseLabel);
+        folderLabel.setAlignment(Pos.CENTER);
 
-        VBox defaultMinecraftVersionChooserBox = new VBox();
-        defaultMinecraftVersionChooserBox.getChildren().add(defaultMinecraftVersionChoose);
-        defaultMinecraftVersionChooserBox.setAlignment(Pos.CENTER_RIGHT);
-
-        VBox defaultForgeVersionChooserBox = new VBox();
-        defaultForgeVersionChooserBox.getChildren().add(chooseDefaultForgeVersion);
-        defaultForgeVersionChooserBox.setAlignment(Pos.CENTER_RIGHT);
-
-        VBox customForgeLaunchChoosersBox = new VBox();
-        customForgeLaunchChoosersBox.getChildren().addAll(enableCustomLaunch, folderChoose);
-        customForgeLaunchChoosersBox.setAlignment(Pos.CENTER_RIGHT);
-        customForgeLaunchChoosersBox.setSpacing(10);
-
-        VBox enableForgeCacheChooserBox = new VBox();
-        enableForgeCacheChooserBox.getChildren().add(enableForgeCacheChoose);
-        enableForgeCacheChooserBox.setAlignment(Pos.CENTER_LEFT);
-
-
-
-        HBox defaultMinecraftVersionFullBox = new HBox();
-        defaultMinecraftVersionFullBox.getChildren().addAll(defaultMinecraftVersionLabelBox, new Region(), defaultMinecraftVersionChooserBox);
-        HBox.setHgrow(defaultMinecraftVersionFullBox.getChildren().get(1), Priority.ALWAYS);
-        defaultMinecraftVersionFullBox.setAlignment(Pos.CENTER);
-
-        HBox defaultForgeVersionFullBox = new HBox();
-        defaultForgeVersionFullBox.getChildren().addAll(defaultForgeVersionLabelBox, new Region(), defaultForgeVersionChooserBox);
-        HBox.setHgrow(defaultForgeVersionFullBox.getChildren().get(1), Priority.ALWAYS);
-        defaultForgeVersionFullBox.setAlignment(Pos.CENTER);
-
-        HBox customForgeLaunchFullBox = new HBox();
-        customForgeLaunchFullBox.getChildren().addAll(customForgeLaunchLabelBox, new Region(), customForgeLaunchChoosersBox);
-        HBox.setHgrow(customForgeLaunchFullBox.getChildren().get(1), Priority.ALWAYS);
-        customForgeLaunchFullBox.setAlignment(Pos.CENTER);
-
-        HBox enableForgeCachingFullBox = new HBox();
-        enableForgeCachingFullBox.getChildren().addAll(enableForgeCacheLabelBox, new Region(), enableForgeCacheChooserBox);
-        HBox.setHgrow(enableForgeCachingFullBox.getChildren().get(1), Priority.ALWAYS);
-        enableForgeCachingFullBox.setAlignment(Pos.CENTER);
-
+        HBox folderFullBox = new HBox(folderLabel, new Region(), folderChoose);
+        HBox.setHgrow(folderFullBox.getChildren().get(1), Priority.ALWAYS);
+        folderFullBox.setAlignment(Pos.CENTER);
 
         VBox windowLayout = new VBox(
-                mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox,createSeparator("Caching into RAM"),
-                enableForgeCachingFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox);
+                mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox, createSeparator("Caching forge versions"),
+                enableForgeCachingFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox);
 
         windowLayout.getStyleClass().add("settings-vbox");
 
@@ -149,6 +104,34 @@ class Settings {
 
         stage.setTitle("Settings");
         stage.setScene(scene);
+    }
+
+    /**
+     * Creates an HBox layout containing a label and a combo box, aligned with a flexible spacer.
+     *
+     * <p>
+     * This method generates an {@link HBox} where the provided {@link Label} is positioned on the left,
+     * the {@link ComboBox} is positioned on the right, and a resizable {@link Region} is placed
+     * between them to maintain spacing. Each component is wrapped in a {@link VBox} for additional
+     * alignment control.
+     * </p>
+     *
+     * @param label     The {@link Label} to be displayed on the left side of the HBox.
+     * @param comboBox  The {@link ComboBox} to be displayed on the right side of the HBox.
+     * @return          An {@link HBox} containing the provided label and combo box, aligned with spacing.
+     */
+    private <T> HBox HBoxGenerator(Label label, ComboBox<T> comboBox){
+        VBox labelBox = new VBox(label);
+        labelBox.setAlignment(Pos.CENTER_LEFT);
+
+        VBox comboBoxBox = new VBox(comboBox);
+        comboBoxBox.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox fullBox = new HBox(label, new Region(), comboBox);
+        HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
+        fullBox.setAlignment(Pos.CENTER);
+
+        return fullBox;
     }
 
     protected void show() {
