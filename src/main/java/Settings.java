@@ -148,6 +148,7 @@ class Settings {
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
                 throw new RuntimeException(e);
             }
         });
@@ -159,6 +160,7 @@ class Settings {
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
                 throw new RuntimeException(e);
             }
         });
@@ -175,6 +177,7 @@ class Settings {
                     UFI.downloadButton.setText("Download & Launch");
                 }
             } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
                 throw new RuntimeException(e);
             }
         });
@@ -186,6 +189,7 @@ class Settings {
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
                 throw new RuntimeException(e);
             }
         });

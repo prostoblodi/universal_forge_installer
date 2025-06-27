@@ -94,6 +94,7 @@ public class UFI extends Application {
                         showMinecraftVersions();
                         Platform.runLater(() -> updateStatusLabel((byte) 0));
                     } catch (IOException e) {
+                        UFI.updateStatusLabel((byte) 5);
                         throw new RuntimeException(e);
                     }
                 });
@@ -182,6 +183,7 @@ public class UFI extends Application {
                 try {
                     saveMinecraftVersion();
                 } catch (IOException e) {
+                    UFI.updateStatusLabel((byte) 5);
                     throw new RuntimeException(e);
                 }
             }
