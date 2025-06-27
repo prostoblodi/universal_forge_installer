@@ -24,6 +24,14 @@ import java.util.Objects;
 class Settings {
     private final Label mainLabel = new Label("Settings");
 
+    protected final Pair<String, Boolean> unknownBooleanPair = new Pair<>("Unknown", null);
+    protected final Pair<String, Byte> unknownBytePair = new Pair<>("Unknown", (byte) -1);
+
+    private final List<Pair<String, Boolean>> enableOrDisable = List.of(
+            new Pair<>("Enable", true),
+            new Pair<>("Disable", false)
+    );
+
     private final Label defaultMinecraftVersionLabel = new Label("Default minecraft version:");
     private final ComboBox<Pair<String, Byte>> defaultMinecraftVersionChoose = new ComboBox<>();
     private final List<Pair<String, Byte>> defaultMinecraftVersions = List.of(
@@ -31,7 +39,6 @@ class Settings {
             new Pair<>("Newest", (byte) 1),
             new Pair<>("Last used", (byte) 2)
     );
-
 
     private final Label defaultForgeVersionLabel = new Label("Default forge version:");
     private final ComboBox<Pair<String, Byte>> chooseDefaultForgeVersion = new ComboBox<>();
@@ -41,12 +48,11 @@ class Settings {
             new Pair<>("Oldest", (byte) 2)
     );
 
+    private final Label enableForgeCacheLabel = new Label("Cache forge versions:");
+    private final ComboBox<Pair<String, Boolean>> enableForgeCacheChoose = new ComboBox<>();
+
     private final Label enableCustomLaunchLabel = new Label("Enable custom forge launch: ");
     private final ComboBox<Pair<String, Boolean>> enableCustomLaunch = new ComboBox<>();
-    private final List<Pair<String, Boolean>> customLaunches = List.of(
-            new Pair<>("Enable", true),
-            new Pair<>("Disable", false)
-    );
 
     private final Label minecraftFolderChooseLabel = new Label("Choose minecraft folder: ");
     private final TextField minecraftFolderField = new TextField();
@@ -76,15 +82,21 @@ class Settings {
         defaultForgeVersionLabelBox.getChildren().add(defaultForgeVersionLabel);
         defaultForgeVersionLabelBox.setAlignment(Pos.CENTER_LEFT);
 
-        VBox customForgeLaunchLabelsBox = new VBox();
-        customForgeLaunchLabelsBox.getChildren().addAll(enableCustomLaunchLabel, minecraftFolderChooseLabel);
-        customForgeLaunchLabelsBox.setAlignment(Pos.CENTER_LEFT);
-        customForgeLaunchLabelsBox.setSpacing(15);
+        VBox customForgeLaunchLabelBox = new VBox();
+        customForgeLaunchLabelBox.getChildren().addAll(enableCustomLaunchLabel, minecraftFolderChooseLabel);
+        customForgeLaunchLabelBox.setAlignment(Pos.CENTER_LEFT);
+        customForgeLaunchLabelBox.setSpacing(15);
+
+        VBox enableForgeCacheLabelBox = new VBox();
+        enableForgeCacheLabelBox.getChildren().add(enableForgeCacheLabel);
+        enableForgeCacheLabelBox.setAlignment(Pos.CENTER_LEFT);
+
 
         HBox folderChoose = new HBox();
         folderChoose.getChildren().addAll(minecraftFolderField, minecraftFolderButton);
         folderChoose.setAlignment(Pos.CENTER);
         folderChoose.setSpacing(10);
+
 
         VBox defaultMinecraftVersionChooserBox = new VBox();
         defaultMinecraftVersionChooserBox.getChildren().add(defaultMinecraftVersionChoose);
@@ -99,6 +111,12 @@ class Settings {
         customForgeLaunchChoosersBox.setAlignment(Pos.CENTER_RIGHT);
         customForgeLaunchChoosersBox.setSpacing(10);
 
+        VBox enableForgeCacheChooserBox = new VBox();
+        enableForgeCacheChooserBox.getChildren().add(enableForgeCacheChoose);
+        enableForgeCacheChooserBox.setAlignment(Pos.CENTER_LEFT);
+
+
+
         HBox defaultMinecraftVersionFullBox = new HBox();
         defaultMinecraftVersionFullBox.getChildren().addAll(defaultMinecraftVersionLabelBox, new Region(), defaultMinecraftVersionChooserBox);
         HBox.setHgrow(defaultMinecraftVersionFullBox.getChildren().get(1), Priority.ALWAYS);
@@ -110,11 +128,20 @@ class Settings {
         defaultForgeVersionFullBox.setAlignment(Pos.CENTER);
 
         HBox customForgeLaunchFullBox = new HBox();
-        customForgeLaunchFullBox.getChildren().addAll(customForgeLaunchLabelsBox, new Region(), customForgeLaunchChoosersBox);
+        customForgeLaunchFullBox.getChildren().addAll(customForgeLaunchLabelBox, new Region(), customForgeLaunchChoosersBox);
         HBox.setHgrow(customForgeLaunchFullBox.getChildren().get(1), Priority.ALWAYS);
         customForgeLaunchFullBox.setAlignment(Pos.CENTER);
 
-        VBox windowLayout = new VBox(mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox);
+        HBox enableForgeCachingFullBox = new HBox();
+        enableForgeCachingFullBox.getChildren().addAll(enableForgeCacheLabelBox, new Region(), enableForgeCacheChooserBox);
+        HBox.setHgrow(enableForgeCachingFullBox.getChildren().get(1), Priority.ALWAYS);
+        enableForgeCachingFullBox.setAlignment(Pos.CENTER);
+
+
+        VBox windowLayout = new VBox(
+                mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox,createSeparator("Caching into RAM"),
+                enableForgeCachingFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox);
+
         windowLayout.getStyleClass().add("settings-vbox");
 
         Scene scene = new Scene(windowLayout);
@@ -134,10 +161,12 @@ class Settings {
         defaultMinecraftVersionLabel.getStyleClass().add("settings-label");
         defaultForgeVersionLabel.getStyleClass().add("settings-label");
         enableCustomLaunchLabel.getStyleClass().add("settings-label");
+        enableForgeCacheLabel.getStyleClass().addAll("settings-label");
         minecraftFolderChooseLabel.getStyleClass().add("settings-label");
 
         defaultMinecraftVersionChoose.getStyleClass().add("combo-box");
         chooseDefaultForgeVersion.getStyleClass().add("combo-box");
+        enableForgeCacheChoose.getStyleClass().add("combo-box");
     }
 
     private void setActions () {
@@ -156,6 +185,18 @@ class Settings {
         chooseDefaultForgeVersion.setOnAction((_) -> {
             UFI.defaultForgeVersion = chooseDefaultForgeVersion.getValue().getValue();
             System.out.println("@ Default forge version changed to: " + UFI.defaultForgeVersion);
+
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
+                throw new RuntimeException(e);
+            }
+        });
+
+        enableForgeCacheChoose.setOnAction((_) -> {
+            UFI.enableForgeCaching = enableForgeCacheChoose.getValue().getValue();
+            System.out.println("@ Forge versions cache is now: " + UFI.enableForgeCaching);
 
             try {
                 UFI.updateSettingsFile();
@@ -201,14 +242,17 @@ class Settings {
         Tooltip.install(minecraftFolderField, tooltip);
 
         minecraftFolderField.setText(UFI.minecraftFolder);
-        chooseDefaultForgeVersion.setValue(defaultForgeVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultForgeVersion)).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
-        defaultMinecraftVersionChoose.setValue(defaultMinecraftVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultMinecraftVersion)).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
-        enableCustomLaunch.setValue(customLaunches.stream().filter(pair -> pair.getValue().equals(UFI.customForgeLaunch)).findFirst().orElse(new Pair<>("Unknown", null)));
+        chooseDefaultForgeVersion.setValue(defaultForgeVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultForgeVersion)).findFirst().orElse(unknownBytePair));
+        defaultMinecraftVersionChoose.setValue(defaultMinecraftVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultMinecraftVersion)).findFirst().orElse(unknownBytePair));
+
+        enableForgeCacheChoose.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.enableForgeCaching)).findFirst().orElse(unknownBooleanPair));
+        enableCustomLaunch.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.customForgeLaunch)).findFirst().orElse(unknownBooleanPair));
 
         minecraftFolderField.setOnContextMenuRequested(Event::consume);
 
         initializeDefaultMinecraftVersionChooser();
         initializeDefaultForgeVersionChooser();
+        initializeForgeCacheChooser();
         initializeEnableCustomForgeLaunch();
     }
 
@@ -268,8 +312,36 @@ class Settings {
         });
     }
 
+    private void initializeForgeCacheChooser() {
+        enableForgeCacheChoose.getItems().addAll(enableOrDisable);
+
+        enableForgeCacheChoose.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
+                }
+            }
+        });
+
+        enableForgeCacheChoose.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
+                }
+            }
+        });
+    }
+
     private void initializeEnableCustomForgeLaunch() {
-        enableCustomLaunch.getItems().addAll(customLaunches);
+        enableCustomLaunch.getItems().addAll(enableOrDisable);
 
         enableCustomLaunch.setCellFactory(_ -> new ListCell<>() {
             @Override

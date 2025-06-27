@@ -43,6 +43,7 @@ public class UFI extends Application {
 
     protected static byte defaultMinecraftVersion;
     protected static byte defaultForgeVersion;
+    protected static boolean enableForgeCaching;
     protected static boolean customForgeLaunch;
     protected static String minecraftFolder;
 
@@ -191,7 +192,13 @@ public class UFI extends Application {
     }
 
     private void updateForgeVersions() throws IOException {
-        List<Pair<String, Byte>> assetClasses = minecraftToForgeVersions.get(minecraftVersion) != null ? minecraftToForgeVersions.get(minecraftVersion) : getForgeVersions();
+        List<Pair<String, Byte>> assetClasses;
+
+        if (enableForgeCaching){
+            assetClasses = minecraftToForgeVersions.get(minecraftVersion) != null ? minecraftToForgeVersions.get(minecraftVersion) : getForgeVersions();
+        } else {
+            assetClasses = getForgeVersions();
+        }
 
         Platform.runLater(() -> {
             chooseForgeVersion.getItems().setAll(assetClasses);
@@ -202,7 +209,9 @@ public class UFI extends Application {
                 case 2 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Installer.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
             }
 
-            minecraftToForgeVersions.putIfAbsent(minecraftVersion, assetClasses);
+            if (enableForgeCaching) {
+                minecraftToForgeVersions.putIfAbsent(minecraftVersion, assetClasses);
+            }
 
             chooseForgeVersion.setCellFactory(_ -> new ListCell<>() {
                 @Override
@@ -302,15 +311,17 @@ public class UFI extends Application {
             System.out.println("| Settings file already exists at " + settingsPath);
 
             List<String> lines = Files.readAllLines(Paths.get(settingsPath));
+            String[] data;
+
             for (String line : lines) {
                 if (line.contains("defaultForgeVersionByte")){
-                    String[] data = line.split("=");
+                    data = line.split("=");
                     defaultForgeVersion = Byte.parseByte(data[1]);
-                } else if (line.contains("customForgeLaunch")){
-                    String[] data = line.split("=");
+                } else if (line.contains("customForgeLaunch")) {
+                    data = line.split("=");
                     customForgeLaunch = Boolean.parseBoolean(data[1]);
-                } else if (line.contains("minecraftFolder")){
-                    String[] data = line.split("=");
+                } else if (line.contains("minecraftFolder")) {
+                    data = line.split("=");
                     if (data.length > 1) {
                         minecraftFolder = data[1];
                     } else {
@@ -320,15 +331,20 @@ public class UFI extends Application {
                             minecraftFolder = String.valueOf(new File(System.getProperty("user.home"), ".minecraft"));
                         }
                     }
-                } else if (line.contains("defaultMinecraftVersion")){
-                    String[] data = line.split("=");
+                } else if (line.contains("defaultMinecraftVersion")) {
+                    data = line.split("=");
                     defaultMinecraftVersion = Byte.parseByte(data[1]);
+                } else if (line.contains("enableForgeCaching")) {
+                    data = line.split("=");
+                    enableForgeCaching = Boolean.parseBoolean(data[1]);
                 }
             }
         }
 
-        System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%nL minecraftFolder: %s, defaultMinecraftVersion: %d%n%n",
-                           defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultForgeVersion);
+        System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%n" +
+                        "| minecraftFolder: %s, defaultMinecraftVersion: %d,%n" +
+                        "L enableForgeCache: %b%n%n",
+                           defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultForgeVersion, enableForgeCaching);
 
         if (customForgeLaunch) {
             downloadButton.setText("Download & Install");
@@ -360,8 +376,8 @@ public class UFI extends Application {
 
     protected static void updateSettingsFile() throws IOException {
         try (FileWriter writer = new FileWriter(settingsFile)) {
-            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersion=%d",
-                                        defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultMinecraftVersion));
+            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersion=%d%nenableForgeCaching=%b",
+                                        defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultMinecraftVersion, enableForgeCaching));
         }
     }
 
