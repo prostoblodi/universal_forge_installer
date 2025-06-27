@@ -2,7 +2,8 @@
 ## Needs java 24+ to work
 
 # An application that allows you to download and install any version of Forge.
-![изображение](https://github.com/user-attachments/assets/1037d3ee-0ce3-46d5-a79f-1a92aec38ff9)
+![изображение](https://github.com/user-attachments/assets/ce573a05-25d5-47ca-a96a-83bd58576bd6)
+
 
 
 # How to run it?
