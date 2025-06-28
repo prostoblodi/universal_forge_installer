@@ -51,8 +51,8 @@ class Settings {
     private final Label enableForgeCacheLabel = new Label("Cache forge versions:");
     private final ComboBox<Pair<String, Boolean>> enableForgeCacheChoose = new ComboBox<>();
 
-//    private final Label enableForgeFileCacheLabel = new Label("Cache forge versions to file:");
-//    private final ComboBox<Pair<String, Byte>> enableForgeFileCacheChoose = new ComboBox<>();
+    private final Label enableForgeFileCacheLabel = new Label("Cache forge versions to file:");
+    private final ComboBox<Pair<String, Boolean>> enableForgeFileCacheChoose = new ComboBox<>();
 
     private final Label enableCustomLaunchLabel = new Label("Enable custom forge launch: ");
     private final ComboBox<Pair<String, Boolean>> enableCustomLaunch = new ComboBox<>();
@@ -80,6 +80,7 @@ class Settings {
         HBox defaultMinecraftVersionFullBox = HBoxGenerator(defaultMinecraftVersionLabel, defaultMinecraftVersionChoose);
         HBox defaultForgeVersionFullBox = HBoxGenerator(defaultForgeVersionLabel, chooseDefaultForgeVersion);
         HBox enableForgeCachingFullBox = HBoxGenerator(enableForgeCacheLabel, enableForgeCacheChoose);
+        HBox enableForgeCachingFileFullBox = HBoxGenerator(enableForgeFileCacheLabel, enableForgeFileCacheChoose);
         HBox customForgeLaunchFullBox = HBoxGenerator(enableCustomLaunchLabel, enableCustomLaunch);
 
         HBox folderChoose = new HBox(minecraftFolderField, minecraftFolderButton);
@@ -95,7 +96,7 @@ class Settings {
 
         VBox windowLayout = new VBox(
                 mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox, createSeparator("Caching forge versions"),
-                enableForgeCachingFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox);
+                enableForgeCachingFullBox, enableForgeCachingFileFullBox, createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox);
 
         windowLayout.getStyleClass().add("settings-vbox");
 
@@ -106,20 +107,6 @@ class Settings {
         stage.setScene(scene);
     }
 
-    /**
-     * Creates an HBox layout containing a label and a combo box, aligned with a flexible spacer.
-     *
-     * <p>
-     * This method generates an {@link HBox} where the provided {@link Label} is positioned on the left,
-     * the {@link ComboBox} is positioned on the right, and a resizable {@link Region} is placed
-     * between them to maintain spacing. Each component is wrapped in a {@link VBox} for additional
-     * alignment control.
-     * </p>
-     *
-     * @param label     The {@link Label} to be displayed on the left side of the HBox.
-     * @param comboBox  The {@link ComboBox} to be displayed on the right side of the HBox.
-     * @return          An {@link HBox} containing the provided label and combo box, aligned with spacing.
-     */
     private <T> HBox HBoxGenerator(Label label, ComboBox<T> comboBox){
         VBox labelBox = new VBox(label);
         labelBox.setAlignment(Pos.CENTER_LEFT);
@@ -134,6 +121,34 @@ class Settings {
         return fullBox;
     }
 
+    private <T> void initializeComboBox(ComboBox<Pair<String, T>> comboBox, List<Pair<String, T>> comboBoxPairs){
+        comboBox.getItems().addAll(comboBoxPairs);
+
+        comboBox.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, T> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
+                }
+            }
+        });
+
+        comboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, T> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
+                }
+            }
+        });
+    }
+
     protected void show() {
         stage.show();
     }
@@ -146,10 +161,12 @@ class Settings {
         enableCustomLaunchLabel.getStyleClass().add("settings-label");
         enableForgeCacheLabel.getStyleClass().addAll("settings-label");
         minecraftFolderChooseLabel.getStyleClass().add("settings-label");
+        enableForgeFileCacheLabel.getStyleClass().add("settings-label");
 
         defaultMinecraftVersionChoose.getStyleClass().add("combo-box");
         chooseDefaultForgeVersion.getStyleClass().add("combo-box");
         enableForgeCacheChoose.getStyleClass().add("combo-box");
+        enableForgeFileCacheChoose.getStyleClass().add("combo-box");
     }
 
     private void setActions () {
@@ -184,6 +201,18 @@ class Settings {
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
+                throw new RuntimeException(e);
+            }
+        });
+
+        enableForgeFileCacheChoose.setOnAction((_) -> {
+            UFI.enableForgeFileCaching = enableForgeFileCacheChoose.getValue().getValue();
+            System.out.println("@ Forge versions cache to file is now: " + UFI.enableForgeFileCaching);
+
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e){
                 UFI.updateStatusLabel((byte) 5);
                 throw new RuntimeException(e);
             }
@@ -229,126 +258,16 @@ class Settings {
         defaultMinecraftVersionChoose.setValue(defaultMinecraftVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultMinecraftVersion)).findFirst().orElse(unknownBytePair));
 
         enableForgeCacheChoose.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.enableForgeCaching)).findFirst().orElse(unknownBooleanPair));
-        enableCustomLaunch.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.customForgeLaunch)).findFirst().orElse(unknownBooleanPair));
+        enableForgeFileCacheChoose.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.enableForgeFileCaching)).findFirst().orElse(unknownBooleanPair));
 
+        enableCustomLaunch.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.customForgeLaunch)).findFirst().orElse(unknownBooleanPair));
         minecraftFolderField.setOnContextMenuRequested(Event::consume);
 
-        initializeDefaultMinecraftVersionChooser();
-        initializeDefaultForgeVersionChooser();
-        initializeForgeCacheChooser();
-        initializeEnableCustomForgeLaunch();
-    }
-
-    private void initializeDefaultForgeVersionChooser() {
-        chooseDefaultForgeVersion.getItems().addAll(defaultForgeVersions);
-
-        chooseDefaultForgeVersion.setCellFactory(_ -> new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Byte> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-
-        chooseDefaultForgeVersion.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Byte> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-    }
-
-    private void initializeDefaultMinecraftVersionChooser() {
-        defaultMinecraftVersionChoose.getItems().addAll(defaultMinecraftVersions);
-
-        defaultMinecraftVersionChoose.setCellFactory(_ -> new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Byte> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-
-        defaultMinecraftVersionChoose.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Byte> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-    }
-
-    private void initializeForgeCacheChooser() {
-        enableForgeCacheChoose.getItems().addAll(enableOrDisable);
-
-        enableForgeCacheChoose.setCellFactory(_ -> new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-
-        enableForgeCacheChoose.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-    }
-
-    private void initializeEnableCustomForgeLaunch() {
-        enableCustomLaunch.getItems().addAll(enableOrDisable);
-
-        enableCustomLaunch.setCellFactory(_ -> new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-
-        enableCustomLaunch.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, Boolean> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
+        initializeComboBox(chooseDefaultForgeVersion, defaultForgeVersions);
+        initializeComboBox(defaultMinecraftVersionChoose, defaultMinecraftVersions);
+        initializeComboBox(enableForgeCacheChoose, enableOrDisable);
+        initializeComboBox(enableForgeFileCacheChoose, enableOrDisable);
+        initializeComboBox(enableCustomLaunch, enableOrDisable);
     }
 
     private HBox createSeparator(String text) {

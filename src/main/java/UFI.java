@@ -12,16 +12,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class UFI extends Application {
     private final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
@@ -30,7 +25,7 @@ public class UFI extends Application {
     private static String minecraftVersion = "";
     private static Pair<String, Byte> forgeVersion = new Pair<>("", (byte) -1);
 
-    private final HashMap<String, List<Pair<String, Byte>>> minecraftToForgeVersions = new HashMap<>();
+    private static final HashMap<String, List<Pair<String, Byte>>> minecraftToForgeVersions = new HashMap<>();
 
     private final Label mainLabel = new Label("Universal Forge Installer");
     private final Label minecraftVersionLabel = new Label("Minecraft version: ");
@@ -44,6 +39,7 @@ public class UFI extends Application {
     protected static byte defaultMinecraftVersion;
     protected static byte defaultForgeVersion;
     protected static boolean enableForgeCaching;
+    protected static boolean enableForgeFileCaching;
     protected static boolean customForgeLaunch;
     protected static String minecraftFolder;
 
@@ -211,6 +207,11 @@ public class UFI extends Application {
 
             if (enableForgeCaching) {
                 minecraftToForgeVersions.putIfAbsent(minecraftVersion, assetClasses);
+                try {
+                    updateCacheFile();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             chooseForgeVersion.setCellFactory(_ -> new ListCell<>() {
@@ -337,14 +338,17 @@ public class UFI extends Application {
                 } else if (line.contains("enableForgeCaching")) {
                     data = line.split("=");
                     enableForgeCaching = Boolean.parseBoolean(data[1]);
+                } else if (line.contains("enableForgeFileCaching")) {
+                    data = line.split("=");
+                    enableForgeFileCaching = Boolean.parseBoolean(data[1]);
                 }
             }
         }
 
         System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%n" +
                         "| minecraftFolder: %s, defaultMinecraftVersion: %d,%n" +
-                        "L enableForgeCache: %b%n%n",
-                           defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultForgeVersion, enableForgeCaching);
+                        "L enableForgeCache: %b, enableForgeFileCacge: %b%n%n",
+                           defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultForgeVersion, enableForgeCaching, enableForgeFileCaching);
 
         if (customForgeLaunch) {
             downloadButton.setText("Download & Install");
@@ -363,27 +367,89 @@ public class UFI extends Application {
             System.out.println("| Cache file already exists at " + cachePath);
 
             List<String> lines = Files.readAllLines(Paths.get(cachePath));
+            String[] data;
+
             for (String line : lines){
                 if (line.contains("defaultMinecraftVersion")){
-                    String[] data = line.split("=");
+                    data = line.split("=");
                     lastUsedMinecraftVersion = data[1];
+                } else if (line.contains("minecraftToForgeVersions")) {
+                    data = line.split("=", 2);
+                    parseToHashMap(data[1], minecraftToForgeVersions, true);
+                } else if (line.contains("minecraftToSpecifiedForgeVersions")) {
+                    data = line.split("=", 2);
+                    parseToHashMap(data[1], Installer.minecraftToSpecifiedForgeVersions, false);
                 }
             }
         }
 
-        System.out.printf("L Saved cache as: lastUsedMinecraftVersion: %s%n", lastUsedMinecraftVersion);
+        System.out.println("L Cache successfully checked.");
     }
 
     protected static void updateSettingsFile() throws IOException {
         try (FileWriter writer = new FileWriter(settingsFile)) {
-            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersion=%d%nenableForgeCaching=%b",
-                                        defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultMinecraftVersion, enableForgeCaching));
+            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%n" +
+                                       "defaultMinecraftVersion=%d%nenableForgeCaching=%b%nenableForgeFileCaching=%b",
+                                        defaultForgeVersion, customForgeLaunch, minecraftFolder, defaultMinecraftVersion, enableForgeCaching, enableForgeFileCaching));
         }
     }
 
     protected static void updateCacheFile() throws IOException {
         try (FileWriter writer = new FileWriter(cacheFile)){
-            writer.write(String.format("defaultMinecraftVersion=%s", lastUsedMinecraftVersion));
+            writer.write(String.format("defaultMinecraftVersion=%s%nminecraftToForgeVersions=%s%nminecraftToSpecifiedForgeVersions=%s",
+                    lastUsedMinecraftVersion, minecraftToForgeVersions, Installer.minecraftToSpecifiedForgeVersions));
+        }
+    }
+
+    private static <T> void parseToHashMap(String input, HashMap<String, List<T>> hashMap, boolean isPair) {
+        String str = input.substring(1, input.length() - 1);
+        int pos = 0;
+
+        while (pos < str.length()) {
+            int equalPos = str.indexOf('=', pos);
+            String key = str.substring(pos, equalPos).trim();
+
+            int startList = str.indexOf('[', equalPos);
+            int depth = 0;
+            int endList = startList;
+            for (int i = startList; i < str.length(); i++) {
+                if (str.charAt(i) == '[') depth++;
+                else if (str.charAt(i) == ']') {
+                    depth--;
+                    if (depth == 0) {
+                        endList = i;
+                        break;
+                    }
+                }
+            }
+
+            String listStr = str.substring(startList + 1, endList).trim();
+            List<T> list = new ArrayList<>();
+
+            if (!listStr.isEmpty()) {
+                String[] items = listStr.split(",");
+                for (String item : items) {
+                    item = item.trim();
+                    if (isPair) {
+                        String[] pairParts = item.split("=", 2);
+                        String first = pairParts[0].trim();
+                        byte second = Byte.parseByte(pairParts[1].trim());
+                        @SuppressWarnings("unchecked")
+                        T pair = (T) new Pair<>(first, second);
+                        list.add(pair);
+                    } else {
+                        @SuppressWarnings("unchecked")
+                        T value = (T) item;
+                        list.add(value);
+                    }
+                }
+            }
+
+            hashMap.put(key, list);
+
+            pos = endList + 1;
+            if (pos < str.length() && str.charAt(pos) == ',') pos++;
+            if (pos < str.length() && str.charAt(pos) == ' ') pos++;
         }
     }
 }
