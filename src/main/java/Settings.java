@@ -77,11 +77,11 @@ class Settings {
             minecraftFolderField.setText(s);
         });
 
-        HBox defaultMinecraftVersionFullBox = HBoxGenerator(defaultMinecraftVersionLabel, defaultMinecraftVersionChoose);
-        HBox defaultForgeVersionFullBox = HBoxGenerator(defaultForgeVersionLabel, chooseDefaultForgeVersion);
-        HBox enableForgeCachingFullBox = HBoxGenerator(enableForgeCacheLabel, enableForgeCacheChoose);
-        HBox enableForgeCachingFileFullBox = HBoxGenerator(enableForgeFileCacheLabel, enableForgeFileCacheChoose);
-        HBox customForgeLaunchFullBox = HBoxGenerator(enableCustomLaunchLabel, enableCustomLaunch);
+        HBox defaultMinecraftVersionFullBox = ComboHBoxGenerator(defaultMinecraftVersionLabel, defaultMinecraftVersionChoose);
+        HBox defaultForgeVersionFullBox = ComboHBoxGenerator(defaultForgeVersionLabel, chooseDefaultForgeVersion);
+        HBox enableForgeCachingFullBox = ComboHBoxGenerator(enableForgeCacheLabel, enableForgeCacheChoose);
+        HBox enableForgeCachingFileFullBox = ComboHBoxGenerator(enableForgeFileCacheLabel, enableForgeFileCacheChoose);
+        HBox customForgeLaunchFullBox = ComboHBoxGenerator(enableCustomLaunchLabel, enableCustomLaunch);
 
         HBox folderChoose = new HBox(minecraftFolderField, minecraftFolderButton);
         folderChoose.setAlignment(Pos.CENTER);
@@ -107,7 +107,7 @@ class Settings {
         stage.setScene(scene);
     }
 
-    private <T> HBox HBoxGenerator(Label label, ComboBox<T> comboBox){
+    private <T> HBox ComboHBoxGenerator(Label label, ComboBox<T> comboBox){
         VBox labelBox = new VBox(label);
         labelBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -171,8 +171,8 @@ class Settings {
 
     private void setActions () {
         defaultMinecraftVersionChoose.setOnAction((_) -> {
-            UFI.defaultMinecraftVersion = defaultMinecraftVersionChoose.getValue().getValue();
-            System.out.println("@ Default minecraft version changed to: " + UFI.defaultMinecraftVersion);
+            Universal.defaultMinecraftVersion = defaultMinecraftVersionChoose.getValue().getValue();
+            System.out.println("@ Default minecraft version changed to: " + Universal.defaultMinecraftVersion);
 
             try {
                 UFI.updateSettingsFile();
@@ -183,8 +183,8 @@ class Settings {
         });
 
         chooseDefaultForgeVersion.setOnAction((_) -> {
-            UFI.defaultForgeVersion = chooseDefaultForgeVersion.getValue().getValue();
-            System.out.println("@ Default forge version changed to: " + UFI.defaultForgeVersion);
+            Universal.defaultForgeVersion = chooseDefaultForgeVersion.getValue().getValue();
+            System.out.println("@ Default forge version changed to: " + Universal.defaultForgeVersion);
 
             try {
                 UFI.updateSettingsFile();
@@ -195,8 +195,8 @@ class Settings {
         });
 
         enableForgeCacheChoose.setOnAction((_) -> {
-            UFI.enableForgeCaching = enableForgeCacheChoose.getValue().getValue();
-            System.out.println("@ Forge versions cache is now: " + UFI.enableForgeCaching);
+            Universal.enableForgeCaching = enableForgeCacheChoose.getValue().getValue();
+            System.out.println("@ Forge versions cache is now: " + Universal.enableForgeCaching);
 
             try {
                 UFI.updateSettingsFile();
@@ -207,8 +207,8 @@ class Settings {
         });
 
         enableForgeFileCacheChoose.setOnAction((_) -> {
-            UFI.enableForgeFileCaching = enableForgeFileCacheChoose.getValue().getValue();
-            System.out.println("@ Forge versions cache to file is now: " + UFI.enableForgeFileCaching);
+            Universal.enableForgeFileCaching = enableForgeFileCacheChoose.getValue().getValue();
+            System.out.println("@ Forge versions cache to file is now: " + Universal.enableForgeFileCaching);
 
             try {
                 UFI.updateSettingsFile();
@@ -219,8 +219,8 @@ class Settings {
         });
 
         enableCustomLaunch.setOnAction((_) -> {
-            UFI.customForgeLaunch = enableCustomLaunch.getValue().getValue();
-            System.out.println("@ Forge custom launch changed to: " + UFI.customForgeLaunch);
+            Universal.customForgeLaunch = enableCustomLaunch.getValue().getValue();
+            System.out.println("@ Forge custom launch changed to: " + Universal.customForgeLaunch);
 
             try {
                 UFI.updateSettingsFile();
@@ -236,8 +236,8 @@ class Settings {
         });
 
         minecraftFolderField.textProperty().addListener((_, _, _) -> {
-            UFI.minecraftFolder = minecraftFolderField.getText();
-            System.out.println("@ Minecraft folder changed to: " + UFI.minecraftFolder);
+            Universal.minecraftFolder = minecraftFolderField.getText();
+            System.out.println("@ Minecraft folder changed to: " + Universal.minecraftFolder);
 
             try {
                 UFI.updateSettingsFile();
@@ -253,14 +253,14 @@ class Settings {
         tooltip.textProperty().bind(minecraftFolderField.textProperty());
         Tooltip.install(minecraftFolderField, tooltip);
 
-        minecraftFolderField.setText(UFI.minecraftFolder);
-        chooseDefaultForgeVersion.setValue(defaultForgeVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultForgeVersion)).findFirst().orElse(unknownBytePair));
-        defaultMinecraftVersionChoose.setValue(defaultMinecraftVersions.stream().filter(pair -> pair.getValue().equals(UFI.defaultMinecraftVersion)).findFirst().orElse(unknownBytePair));
+        minecraftFolderField.setText(Universal.minecraftFolder);
+        chooseDefaultForgeVersion.setValue(defaultForgeVersions.stream().filter(pair -> pair.getValue().equals(Universal.defaultForgeVersion)).findFirst().orElse(unknownBytePair));
+        defaultMinecraftVersionChoose.setValue(defaultMinecraftVersions.stream().filter(pair -> pair.getValue().equals(Universal.defaultMinecraftVersion)).findFirst().orElse(unknownBytePair));
 
-        enableForgeCacheChoose.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.enableForgeCaching)).findFirst().orElse(unknownBooleanPair));
-        enableForgeFileCacheChoose.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.enableForgeFileCaching)).findFirst().orElse(unknownBooleanPair));
+        enableForgeCacheChoose.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(Universal.enableForgeCaching)).findFirst().orElse(unknownBooleanPair));
+        enableForgeFileCacheChoose.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(Universal.enableForgeFileCaching)).findFirst().orElse(unknownBooleanPair));
 
-        enableCustomLaunch.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(UFI.customForgeLaunch)).findFirst().orElse(unknownBooleanPair));
+        enableCustomLaunch.setValue(enableOrDisable.stream().filter(pair -> pair.getValue().equals(Universal.customForgeLaunch)).findFirst().orElse(unknownBooleanPair));
         minecraftFolderField.setOnContextMenuRequested(Event::consume);
 
         initializeComboBox(chooseDefaultForgeVersion, defaultForgeVersions);

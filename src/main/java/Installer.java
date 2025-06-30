@@ -21,8 +21,6 @@ abstract class Installer implements Runnable {
 
     private static Document forgePageDocument;
 
-    protected static final HashMap<String, List<String>> minecraftToSpecifiedForgeVersions = new HashMap<>();
-
     // Return all versions of Minecraft for which Forge is available
     protected static List<String> getMinecraftVersionsForForge() throws IOException {
         List<String> versions = new ArrayList<>();
@@ -48,24 +46,25 @@ abstract class Installer implements Runnable {
             return versions;
         }
 
-        Document document = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
-        forgePageDocument = document;
+        if (forgePageDocument == null){
+            forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
+        }
 
-        Elements tds = document.select(".download-version");
+        Elements tds = forgePageDocument.select(".download-version");
 
         for (Element td : tds) {
             versions.add(td.text().trim());
         }
 
-        if (minecraftToSpecifiedForgeVersions.get(minecraftVersion) == null) {
-            specificalVersions.add(tds.select("td:has(i.promo-latest)").text());
-            specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text() : tds.select("td:has(i.promo-latest)").text());
-            specificalVersions.add(versions.getLast());
-            minecraftToSpecifiedForgeVersions.put(minecraftVersion, specificalVersions);
+        if (Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion) == null) {
+            specificalVersions.add(tds.select("td:has(i.promo-latest)").text().trim());
+            specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text() : tds.select("td:has(i.promo-latest)").text().trim());
+            specificalVersions.add(versions.getLast().trim());
+            Universal.minecraftToSpecifiedForgeVersions.put(minecraftVersion, specificalVersions);
         } else {
-            specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst());
-            specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1));
-            specificalVersions.add(minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast());
+            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst());
+            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1));
+            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast());
         }
 
         System.out.printf("%n***%nVersions of Forge successfully received: " + versions + "%n***%n%n");
@@ -80,11 +79,15 @@ abstract class Installer implements Runnable {
 
         Elements downloadLinks;
 
-        byte howOldIndex = howOldIndex(minecraftVersion);
+        byte howOldIndex = Universal.howOldIndex(minecraftVersion);
 
         if (!forgeJarsDir.toFile().exists()) {
             Files.createDirectory(forgeJarsDir);
             System.out.println("The ForgeJars folder is successfully created.");
+        }
+
+        if (forgePageDocument == null){
+            forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
         }
 
         if (howOldIndex == 2) {
@@ -97,27 +100,29 @@ abstract class Installer implements Runnable {
         }
 
         filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
+        if (!filePath.toFile().exists()) {
+            Element hasDownloadLink = downloadLinks.get(forgeVersionPair.getValue());
+            URL url = new URI(hasDownloadLink.attr("href").split("&url=")[1]).toURL();
 
-        Element hasDownloadLink = downloadLinks.get(forgeVersionPair.getValue());
-        URL url = new URI(hasDownloadLink.attr("href").split("&url=")[1]).toURL();
+            System.out.printf("Download file %s to %s... %n", fileName, filePath);
 
-        System.out.printf("Download file %s to %s... %n", fileName, filePath);
+            long startTime = System.currentTimeMillis();
 
-        long startTime = System.currentTimeMillis();
+            try (InputStream inputStream = url.openStream()) {
+                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
+                throw new IOException("Error downloading Forge from URL: " + url, e);
+            }
 
-        try (InputStream inputStream = url.openStream()) {
-            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            UFI.updateStatusLabel((byte) 5);
-            throw new IOException("Error downloading Forge from URL: " + url, e);
+            long endTime = System.currentTimeMillis();
+            long duration = endTime - startTime;
+
+            System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
+            System.out.printf("Download took %d milliseconds (%.2f seconds)%n", duration, duration / 1000.0);
         }
-
-        long endTime = System.currentTimeMillis();
-        long duration = endTime - startTime;
-
-        System.out.printf("%s is successfully downloaded to: %s%n", fileName, filePath);
-        System.out.printf("Download took %d milliseconds (%.2f seconds)%n", duration, duration / 1000.0);
     }
+
 
     // Run Forge
     protected static void run_forge() {
@@ -128,7 +133,7 @@ abstract class Installer implements Runnable {
         final String modifiedFileName = String.format("'%s'", fileName);
 
         String args = "";
-        if(UFI.customForgeLaunch){args = String.format(" --installClient %s", UFI.minecraftFolder);}
+        if(Universal.customForgeLaunch){args = String.format(" --installClient %s", Universal.minecraftFolder);}
 
         if (isWindows) {
             command = new String[]{
@@ -143,7 +148,7 @@ abstract class Installer implements Runnable {
         }
 
         try {
-            if (UFI.customForgeLaunch){
+            if (Universal.customForgeLaunch){
                 new ProcessBuilder(command)
                         .inheritIO()
                         .start()
@@ -157,34 +162,6 @@ abstract class Installer implements Runnable {
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    /**
-     * Determines the "age index" of a Minecraft version based on the provided version string.
-     *
-     * @param minecraftVersion the version string in the format "x.y.z" (e.g., "1.5.2").
-     * @return a byte representing the "age index" of the version:
-     *         <ul>
-     *           <li><code>2</code> for versions newer than or equal to 1.5.2</li>
-     *           <li><code>1</code> for versions 1.4.x, 1.5.x, or 1.3.2</li>
-     *           <li><code>0</code> for older versions</li>
-     *         </ul>
-     */
-    protected static byte howOldIndex(String minecraftVersion) {
-        String[] versionStringParsed = minecraftVersion.split("\\.");
-        int[] versionParsed = new int[versionStringParsed.length];
-
-        for (int i = 0; i < versionStringParsed.length; i++) {
-            versionParsed[i] = Integer.parseInt(versionStringParsed[i]);
-        }
-
-        if (versionParsed[1] > 5 || (versionParsed[1] == 5 && versionParsed[2] == 2)) {
-            return (byte) 2;
-        } else if(versionParsed[1] == 4 || (versionParsed[1] == 5) || (versionParsed[1] == 3 && versionParsed[2] == 2)){
-            return (byte) 1;
-        } else {
-            return (byte) 0;
         }
     }
 }
