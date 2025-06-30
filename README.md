@@ -2,9 +2,7 @@
 ## Needs java 24+ to work
 
 # An application that allows you to download and install any version of Forge.
-![изображение](https://github.com/user-attachments/assets/ce573a05-25d5-47ca-a96a-83bd58576bd6)
-
-
+![изображение](https://github.com/user-attachments/assets/47e24fb8-c181-4818-8fa7-5aad195560e1)
 
 # How to run it?
 First, you need to download .jar file from [latest available version of UFI](https://github.com/prostoblodi/universal_forge_installer/releases/latest)
