@@ -401,55 +401,39 @@ public class UFI extends Application {
         }
     }
 
-    private static <T> void parseToHashMap(String input, HashMap<String, List<T>> hashMap, boolean isPair) {
-        String str = input.substring(1, input.length() - 1);
-        int pos = 0;
+    @SuppressWarnings("unchecked")
+    private static <T> void parseToHashMap(String line, HashMap<String, List<T>> hashMap, boolean isPair) {
+        line = line.replace("{", "").replace("}", "");
 
-        while (pos < str.length()) {
-            int equalPos = str.indexOf('=', pos);
-            String key = str.substring(pos, equalPos).trim();
+        if (isPair) {
+            for (String entry : line.split("],")) {
+                entry = entry.replace("]", "");
+                String[] keyValue = entry.split("=\\[");
 
-            int startList = str.indexOf('[', equalPos);
-            int depth = 0;
-            int endList = startList;
-            for (int i = startList; i < str.length(); i++) {
-                if (str.charAt(i) == '[') depth++;
-                else if (str.charAt(i) == ']') {
-                    depth--;
-                    if (depth == 0) {
-                        endList = i;
-                        break;
-                    }
+                String key = keyValue[0].trim();
+                List<Pair<String, Byte>> pairList = new ArrayList<>();
+
+                for (String item : keyValue[1].split(",")) {
+                    String[] pair = item.trim().split("=");
+                    String pairKey = pair[0].trim();
+                    byte pairValue = Byte.parseByte(pair[1].trim());
+                    pairList.add(new Pair<>(pairKey, pairValue));
                 }
+
+                hashMap.put(key, (List<T>) pairList);
             }
+        } else {
+            for (String entry : line.split("],")) {
+                entry = entry.replace("]", "");
+                String[] keyValue = entry.split("=\\[");
 
-            String listStr = str.substring(startList + 1, endList).trim();
-            List<T> list = new ArrayList<>();
+                String key = keyValue[0].trim();
 
-            if (!listStr.isEmpty()) {
-                String[] items = listStr.split(",");
-                for (String item : items) {
-                    item = item.trim();
-                    if (isPair) {
-                        String[] pairParts = item.split("=", 2);
-                        String first = pairParts[0].trim();
-                        byte second = Byte.parseByte(pairParts[1].trim());
-                        @SuppressWarnings("unchecked")
-                        T pair = (T) new Pair<>(first, second);
-                        list.add(pair);
-                    } else {
-                        @SuppressWarnings("unchecked")
-                        T value = (T) item;
-                        list.add(value);
-                    }
-                }
+                List<String> stringList = new ArrayList<>(Arrays.asList(keyValue[1].split(",")));
+
+                hashMap.put(key, (List<T>) stringList);
             }
-
-            hashMap.put(key, list);
-
-            pos = endList + 1;
-            if (pos < str.length() && str.charAt(pos) == ',') pos++;
-            if (pos < str.length() && str.charAt(pos) == ' ') pos++;
         }
     }
+
 }
