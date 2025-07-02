@@ -42,6 +42,7 @@ class Settings {
 
     private final ComboBox<Pair<String, Byte>> defaultMinecraftVersionChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Byte>> chooseDefaultForgeVersion = new ComboBox<>();
+    private final ComboBox<Pair<String, Boolean>> enableMinecraftFileCacheChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableForgeCacheChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableForgeFileCacheChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableCustomLaunch = new ComboBox<>();
@@ -65,6 +66,7 @@ class Settings {
 
         HBox defaultMinecraftVersionFullBox = ComboHBoxGenerator( new Label("Default minecraft version:"), defaultMinecraftVersionChoose);
         HBox defaultForgeVersionFullBox = ComboHBoxGenerator(new Label("Default forge version:"), chooseDefaultForgeVersion);
+        HBox enableMinecraftFileCachingFullBox = ComboHBoxGenerator(new Label("Cache minecraft versions into file:"), enableMinecraftFileCacheChoose);
         HBox enableForgeCachingFullBox = ComboHBoxGenerator(new Label("Cache forge versions:"), enableForgeCacheChoose);
         HBox enableForgeCachingFileFullBox = ComboHBoxGenerator(new Label("Cache forge versions to file:"), enableForgeFileCacheChoose);
         HBox customForgeLaunchFullBox = ComboHBoxGenerator(new Label("Enable custom forge launch: "), enableCustomLaunch);
@@ -84,9 +86,10 @@ class Settings {
         mainLabel.getStyleClass().add("main-label");
 
         VBox windowLayout = new VBox(
-                mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox, createSeparator("Caching"),
-                enableForgeCachingFullBox, enableForgeCachingFileFullBox, createSeparator("Custom forge launch"),
-                customForgeLaunchFullBox, folderFullBox);
+                mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox,
+                createSeparator("Caching"), enableMinecraftFileCachingFullBox, enableForgeCachingFullBox, enableForgeCachingFileFullBox,
+                createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox
+        );
 
         windowLayout.getStyleClass().add("settings-vbox");
 
@@ -171,6 +174,18 @@ class Settings {
             }
         });
 
+        enableMinecraftFileCacheChoose.setOnAction((_) -> {
+            Universal.enableMinecraftFileCaching = enableMinecraftFileCacheChoose.getValue().getValue();
+            System.out.println("@ Minecraft versions file cache is now: " + Universal.enableMinecraftFileCaching);
+
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
+                throw new RuntimeException(e);
+            }
+        });
+
         enableForgeCacheChoose.setOnAction((_) -> {
             Universal.enableForgeCaching = enableForgeCacheChoose.getValue().getValue();
             System.out.println("@ Forge versions cache is now: " + Universal.enableForgeCaching);
@@ -235,6 +250,7 @@ class Settings {
         chooseDefaultForgeVersion.setValue(getValue(defaultForgeVersions, Universal.defaultForgeVersion));
         defaultMinecraftVersionChoose.setValue(getValue(defaultMinecraftVersions, Universal.defaultMinecraftVersion));
 
+        enableMinecraftFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableMinecraftFileCaching));
         enableForgeCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeCaching));
         enableForgeFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeFileCaching));
 
@@ -244,6 +260,7 @@ class Settings {
 
         initializeComboBox(chooseDefaultForgeVersion, defaultForgeVersions);
         initializeComboBox(defaultMinecraftVersionChoose, defaultMinecraftVersions);
+        initializeComboBox(enableMinecraftFileCacheChoose, enableOrDisable);
         initializeComboBox(enableForgeCacheChoose, enableOrDisable);
         initializeComboBox(enableForgeFileCacheChoose, enableOrDisable);
         initializeComboBox(enableCustomLaunch, enableOrDisable);

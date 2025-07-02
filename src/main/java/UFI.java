@@ -160,7 +160,13 @@ public class UFI extends Application {
     }
 
     private void showMinecraftVersions() throws IOException {
-        List<String> assetClasses = getMinecraftVersions();
+        if (Universal.enableMinecraftFileCaching && Universal.minecraftVersions.isEmpty()){
+            Universal.minecraftVersions = getMinecraftVersions();
+            updateCacheFile();
+        }
+
+        List<String> assetClasses = Universal.enableMinecraftFileCaching ? Universal.minecraftVersions : getMinecraftVersions();
+
         Platform.runLater(() -> {
             chooseMinecraftVersion.getItems().addAll(assetClasses);
             if (Universal.defaultMinecraftVersion == 1){
@@ -326,7 +332,7 @@ public class UFI extends Application {
                             Universal.minecraftFolder = String.valueOf(new File(System.getProperty("user.home"), ".minecraft"));
                         }
                     }
-                } else if (line.contains("defaultMinecraftVersion")) {
+                } else if (line.contains("defaultMinecraftVersionByte")) {
                     data = line.split("=");
                     Universal.defaultMinecraftVersion = Byte.parseByte(data[1]);
                 } else if (line.contains("enableForgeCaching")) {
@@ -335,14 +341,22 @@ public class UFI extends Application {
                 } else if (line.contains("enableForgeFileCaching")) {
                     data = line.split("=");
                     Universal.enableForgeFileCaching = Boolean.parseBoolean(data[1]);
+                } else if (line.contains("enableMinecraftFileCaching")){
+                    data = line.split("=");
+                    Universal.enableMinecraftFileCaching = Boolean.parseBoolean(data[1]);
                 }
             }
         }
 
-        System.out.printf("* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%n" +
-                        "| minecraftFolder: %s, defaultMinecraftVersion: %d,%n" +
-                        "L enableForgeCache: %b, enableForgeFileCacge: %b%n%n",
-                Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder, Universal.defaultForgeVersion, Universal.enableForgeCaching, Universal.enableForgeFileCaching);
+        System.out.printf(
+                "* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%n" +
+                "| minecraftFolder: %s, defaultMinecraftVersion: %d,%n" +
+                "| enableForgeCache: %b, enableForgeFileCache: %b,%n" +
+                "L enableMinecraftFileCaching: %b%n%n",
+                Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder,
+                Universal.defaultForgeVersion, Universal.enableForgeCaching, Universal.enableForgeFileCaching,
+                Universal.enableMinecraftFileCaching
+        );
 
         if (Universal.customForgeLaunch) {
             downloadButton.setText("Download & Install");
@@ -367,12 +381,22 @@ public class UFI extends Application {
                 if (line.contains("defaultMinecraftVersion")){
                     data = line.split("=");
                     Universal.lastUsedMinecraftVersion = data[1];
-                } else if (line.contains("minecraftToForgeVersions")) {
+                } else if (line.contains("minecraftToForgeVersions") && Universal.enableForgeFileCaching) {
                     data = line.split("=", 2);
-                    parseToHashMap(data[1], Universal.minecraftToForgeVersions, true);
-                } else if (line.contains("minecraftToSpecifiedForgeVersions")) {
+                    if (!Objects.equals(data[1], "{}")) {
+                        parseToHashMap(data[1], Universal.minecraftToForgeVersions, true);
+                    }
+                } else if (line.contains("minecraftToSpecifiedForgeVersions") && Universal.enableForgeFileCaching) {
                     data = line.split("=", 2);
-                    parseToHashMap(data[1], Universal.minecraftToSpecifiedForgeVersions, false);
+                    if (!Objects.equals(data[1], "{}")) {
+                        parseToHashMap(data[1], Universal.minecraftToSpecifiedForgeVersions, false);
+                    }
+                } else if (line.contains("minecraftVersions") && Universal.enableMinecraftFileCaching){
+                    data = line.split("=");
+                    System.out.println(Arrays.toString(data));
+                    for (String i : data[1].replace("[", "").replace("]", "").split(",")){
+                        Universal.minecraftVersions.add(i.trim());
+                    }
                 }
             }
         }
@@ -382,16 +406,18 @@ public class UFI extends Application {
 
     protected static void updateSettingsFile() throws IOException {
         try (FileWriter writer = new FileWriter(settingsFile)) {
-            writer.write(String.format("defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%n" +
-                                       "defaultMinecraftVersion=%d%nenableForgeCaching=%b%nenableForgeFileCaching=%b",
-                    Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder, Universal.defaultMinecraftVersion, Universal.enableForgeCaching, Universal.enableForgeFileCaching));
+            writer.write(String.format(
+                    "defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersionByte=%d%n" +
+                    "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b",
+                    Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder, Universal.defaultMinecraftVersion,
+                    Universal.enableForgeCaching, Universal.enableForgeFileCaching, Universal.enableMinecraftFileCaching));
         }
     }
 
     protected static void updateCacheFile() throws IOException {
         try (FileWriter writer = new FileWriter(cacheFile)){
-            writer.write(String.format("defaultMinecraftVersion=%s%nminecraftToForgeVersions=%s%nminecraftToSpecifiedForgeVersions=%s",
-                    Universal.lastUsedMinecraftVersion, Universal.minecraftToForgeVersions, Universal.minecraftToSpecifiedForgeVersions));
+            writer.write(String.format("defaultMinecraftVersion=%s%nminecraftToForgeVersions=%s%nminecraftToSpecifiedForgeVersions=%s%nminecraftVersions=%s",
+                    Universal.lastUsedMinecraftVersion, Universal.minecraftToForgeVersions, Universal.minecraftToSpecifiedForgeVersions, Universal.minecraftVersions));
         }
     }
 

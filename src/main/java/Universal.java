@@ -1,14 +1,17 @@
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public class Universal {
+    protected static List<String> minecraftVersions = new ArrayList<>();
     protected static final HashMap<String, List<Pair<String, Byte>>> minecraftToForgeVersions = new HashMap<>();
     protected static final HashMap<String, List<String>> minecraftToSpecifiedForgeVersions = new HashMap<>();
 
     protected static byte defaultMinecraftVersion;
     protected static byte defaultForgeVersion;
+    protected static boolean enableMinecraftFileCaching;
     protected static boolean enableForgeCaching;
     protected static boolean enableForgeFileCaching;
     protected static boolean customForgeLaunch;
@@ -16,7 +19,7 @@ public class Universal {
     protected static String lastUsedMinecraftVersion;
 
     protected static boolean isCacheEnabled() {
-        return defaultMinecraftVersion == 2 || enableForgeCaching || enableForgeFileCaching;
+        return defaultMinecraftVersion == 2 || enableForgeCaching || enableForgeFileCaching || enableMinecraftFileCaching;
     }
 
     /**
