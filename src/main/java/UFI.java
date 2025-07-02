@@ -7,6 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -19,6 +21,9 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class UFI extends Application {
+
+    private final Button reload = new Button("", new ImageView(new Image("reload.png", 24, 24, true, true)));
+
     private final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
     private final ComboBox<Pair<String, Byte>> chooseForgeVersion = new ComboBox<>();
 
@@ -55,6 +60,7 @@ public class UFI extends Application {
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
         gp.add(chooseMinecraftVersion, 1, 1);
+        gp.add(reload, 2, 1);
         gp.add(forgeVersionLabel, 0, 2);
         gp.add(chooseForgeVersion, 1, 2);
         gp.setHgap(10);
@@ -77,7 +83,7 @@ public class UFI extends Application {
             try {
                 Platform.runLater(() -> {
                     try {
-                        showMinecraftVersions();
+                        showMinecraftVersions(false);
                         Platform.runLater(() -> updateStatusLabel((byte) 0));
                     } catch (IOException e) {
                         UFI.updateStatusLabel((byte) 5);
@@ -94,6 +100,7 @@ public class UFI extends Application {
         mainLabel.getStyleClass().add("label-main");
         minecraftVersionLabel.getStyleClass().add("label");
         forgeVersionLabel.getStyleClass().add("label");
+        reload.getStyleClass().add("button");
         downloadButton.getStyleClass().add("button");
         settingsButton.getStyleClass().add("button");
         statusLabel.getStyleClass().add("status-label");
@@ -103,7 +110,7 @@ public class UFI extends Application {
         chooseMinecraftVersion.setOnAction(
                 (_) -> new Thread(() -> {
                     try {
-                        saveMinecraftVersion();
+                        saveMinecraftVersion(false);
                         Platform.runLater(() -> updateStatusLabel((byte) 0));
                     } catch (IOException e) {
                         UFI.updateStatusLabel((byte) 5);
@@ -142,14 +149,25 @@ public class UFI extends Application {
         );
 
         settingsButton.setOnAction((_) -> new Settings().show());
+
+        reload.setOnAction((_) -> new Thread(() -> {
+                try {
+                    showMinecraftVersions(true);
+                    Platform.runLater(() -> updateStatusLabel((byte) 0));
+                } catch (IOException e) {
+                    UFI.updateStatusLabel((byte) 5);
+                    throw new RuntimeException(e);
+                }
+            }).start()
+        );
     }
 
-    private void saveMinecraftVersion() throws IOException {
+    private void saveMinecraftVersion(boolean ignoreCache) throws IOException {
         minecraftVersion = chooseMinecraftVersion.getValue();
         Universal.lastUsedMinecraftVersion = minecraftVersion;
 
         if (Universal.isCacheEnabled()) {updateCacheFile();}
-        updateForgeVersions();
+        updateForgeVersions(ignoreCache);
 
         System.out.println("* Saved minecraft version as: " + minecraftVersion);
     }
@@ -159,7 +177,7 @@ public class UFI extends Application {
         System.out.println("* Saved forge version as: " + forgeVersion);
     }
 
-    private void showMinecraftVersions() throws IOException {
+    private void showMinecraftVersions(boolean ignoreCache) throws IOException {
         if (Universal.enableMinecraftFileCaching && Universal.minecraftVersions.isEmpty()){
             Universal.minecraftVersions = getMinecraftVersions();
             updateCacheFile();
@@ -174,7 +192,7 @@ public class UFI extends Application {
             } else if (Universal.defaultMinecraftVersion == 2 && !Objects.equals(Universal.lastUsedMinecraftVersion, "null")){
                 chooseMinecraftVersion.setValue(Universal.lastUsedMinecraftVersion);
                 try {
-                    saveMinecraftVersion();
+                    saveMinecraftVersion(ignoreCache);
                 } catch (IOException e) {
                     UFI.updateStatusLabel((byte) 5);
                     throw new RuntimeException(e);
@@ -183,10 +201,11 @@ public class UFI extends Application {
         });
     }
 
-    private void updateForgeVersions() throws IOException {
+    private void updateForgeVersions(boolean ignoreCache) throws IOException {
         List<Pair<String, Byte>> assetClasses;
 
-        if (Universal.enableForgeCaching){
+
+        if (Universal.enableForgeCaching && !ignoreCache){
             assetClasses = Universal.minecraftToForgeVersions.get(minecraftVersion) != null ? Universal.minecraftToForgeVersions.get(minecraftVersion) : getForgeVersions();
         } else {
             assetClasses = getForgeVersions();
@@ -194,6 +213,7 @@ public class UFI extends Application {
 
         Platform.runLater(() -> {
             chooseForgeVersion.getItems().setAll(assetClasses);
+            System.out.println(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion));
 
             switch (Universal.defaultForgeVersion) {
                 case 0 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1))).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
@@ -393,9 +413,8 @@ public class UFI extends Application {
                     }
                 } else if (line.contains("minecraftVersions") && Universal.enableMinecraftFileCaching){
                     data = line.split("=");
-                    System.out.println(Arrays.toString(data));
                     for (String i : data[1].replace("[", "").replace("]", "").split(",")){
-                        Universal.minecraftVersions.add(i.trim());
+                        Universal.minecraftVersions.add(i.replaceAll(" ", ""));
                     }
                 }
             }
@@ -423,20 +442,20 @@ public class UFI extends Application {
 
     @SuppressWarnings("unchecked")
     private static <T> void parseToHashMap(String line, HashMap<String, List<T>> hashMap, boolean isPair) {
-        line = line.replace("{", "").replace("}", "");
+        line = line.replace("{", "").replace("}", "").replaceAll(" ", "");
 
         if (isPair) {
             for (String entry : line.split("],")) {
                 entry = entry.replace("]", "");
                 String[] keyValue = entry.split("=\\[");
 
-                String key = keyValue[0].trim();
+                String key = keyValue[0];
                 List<Pair<String, Byte>> pairList = new ArrayList<>();
 
                 for (String item : keyValue[1].split(",")) {
-                    String[] pair = item.trim().split("=");
-                    String pairKey = pair[0].trim();
-                    byte pairValue = Byte.parseByte(pair[1].trim());
+                    String[] pair = item.split("=");
+                    String pairKey = pair[0];
+                    byte pairValue = Byte.parseByte(pair[1]);
                     pairList.add(new Pair<>(pairKey, pairValue));
                 }
 
@@ -447,7 +466,7 @@ public class UFI extends Application {
                 entry = entry.replace("]", "");
                 String[] keyValue = entry.split("=\\[");
 
-                String key = keyValue[0].trim();
+                String key = keyValue[0];
 
                 List<String> stringList = new ArrayList<>(Arrays.asList(keyValue[1].split(",")));
 

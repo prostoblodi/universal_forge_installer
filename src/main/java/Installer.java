@@ -27,10 +27,10 @@ abstract class Installer implements Runnable {
         Document document = Jsoup.connect("https://files.minecraftforge.net/net/minecraftforge/forge/").get();
 
         Elements as = document.select("a[href^=index_]");
-        versions.add(document.select(".elem-active").text().trim());
+        versions.add(document.select(".elem-active").text().replaceAll(" ", ""));
 
         for (Element a : as) {
-            versions.add(a.text().trim());
+            versions.add(a.text().replaceAll(" ", ""));
         }
 
         System.out.printf("%n***%nVersions of Minecraft successfully received: " + versions + "%n***%n%n");
@@ -51,18 +51,18 @@ abstract class Installer implements Runnable {
         Elements tds = forgePageDocument.select(".download-version");
 
         for (Element td : tds) {
-            versions.add(td.text().trim());
+            versions.add(td.text().replaceAll(" ", ""));
         }
 
         if (Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion) == null) {
-            specificalVersions.add(tds.select("td:has(i.promo-latest)").text().trim());
-            specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text() : tds.select("td:has(i.promo-latest)").text().trim());
-            specificalVersions.add(versions.getLast().trim());
+            specificalVersions.add(tds.select("td:has(i.promo-latest)").text().replaceAll(" ", ""));
+            specificalVersions.add(!tds.select("td:has(i.promo-recommended)").text().isEmpty() ? tds.select("td:has(i.promo-recommended)").text().replaceAll(" ", "") : tds.select("td:has(i.promo-latest)").text().replaceAll(" ", ""));
+            specificalVersions.add(versions.getLast().replaceAll(" ", ""));
             Universal.minecraftToSpecifiedForgeVersions.put(minecraftVersion, specificalVersions);
         } else {
-            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst());
-            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1));
-            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast());
+            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst().replaceAll(" ", ""));
+            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1).replaceAll(" ", ""));
+            specificalVersions.add(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast().replaceAll(" ", ""));
         }
 
         System.out.printf("%n***%nVersions of Forge successfully received: " + versions + "%n***%n%n");
