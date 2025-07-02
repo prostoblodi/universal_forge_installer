@@ -15,6 +15,10 @@ public class Universal {
     protected static String minecraftFolder;
     protected static String lastUsedMinecraftVersion;
 
+    protected static boolean isCacheEnabled() {
+        return defaultMinecraftVersion == 2 || enableForgeCaching || enableForgeFileCaching;
+    }
+
     /**
      * Determines the "age index" of a Minecraft version based on the provided version string.
      *
@@ -42,6 +46,4 @@ public class Universal {
             return (byte) 0;
         }
     }
-
-
 }

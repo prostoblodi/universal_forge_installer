@@ -46,9 +46,7 @@ abstract class Installer implements Runnable {
             return versions;
         }
 
-        if (forgePageDocument == null){
-            forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
-        }
+        forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
 
         Elements tds = forgePageDocument.select(".download-version");
 
@@ -86,9 +84,8 @@ abstract class Installer implements Runnable {
             System.out.println("The ForgeJars folder is successfully created.");
         }
 
-        if (forgePageDocument == null){
-            forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
-        }
+        forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
+
 
         if (howOldIndex == 2) {
             fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
@@ -122,7 +119,6 @@ abstract class Installer implements Runnable {
             System.out.printf("Download took %d milliseconds (%.2f seconds)%n", duration, duration / 1000.0);
         }
     }
-
 
     // Run Forge
     protected static void run_forge() {

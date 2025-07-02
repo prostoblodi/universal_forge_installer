@@ -50,7 +50,7 @@ public class UFI extends Application {
 
         setLBStyles();
         checkSettings();
-        checkCache();
+        if (Universal.isCacheEnabled()) {checkCache();}
 
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
@@ -148,7 +148,7 @@ public class UFI extends Application {
         minecraftVersion = chooseMinecraftVersion.getValue();
         Universal.lastUsedMinecraftVersion = minecraftVersion;
 
-        updateCacheFile();
+        if (Universal.isCacheEnabled()) {updateCacheFile();}
         updateForgeVersions();
 
         System.out.println("* Saved minecraft version as: " + minecraftVersion);
