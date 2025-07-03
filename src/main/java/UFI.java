@@ -24,8 +24,8 @@ public class UFI extends Application {
 
     private final Button reload = new Button("", new ImageView(new Image("reload.png", 24, 24, true, true)));
 
-    private final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
-    private final ComboBox<Pair<String, Byte>> chooseForgeVersion = new ComboBox<>();
+    private static final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
+    private static final ComboBox<Pair<String, Byte>> chooseForgeVersion = new ComboBox<>();
 
     private static String minecraftVersion = "";
     private static Pair<String, Byte> forgeVersion = new Pair<>("", (byte) -1);
@@ -38,12 +38,6 @@ public class UFI extends Application {
 
     protected static final Button downloadButton = new Button("Download & Launch");
     private final Button settingsButton = new Button("Settings");
-
-    protected static String settingsPath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.settings"));
-    protected static File settingsFile = new File(settingsPath);
-
-    protected static String cachePath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.cache"));
-    protected static File cacheFile = new File(cachePath);
 
     public static void main(String[] args) {
         launch(args);
@@ -162,7 +156,7 @@ public class UFI extends Application {
         );
     }
 
-    private void saveMinecraftVersion(boolean ignoreCache) throws IOException {
+    private static void saveMinecraftVersion(boolean ignoreCache) throws IOException {
         minecraftVersion = chooseMinecraftVersion.getValue();
         Universal.lastUsedMinecraftVersion = minecraftVersion;
 
@@ -177,7 +171,7 @@ public class UFI extends Application {
         System.out.println("* Saved forge version as: " + forgeVersion);
     }
 
-    private void showMinecraftVersions(boolean ignoreCache) throws IOException {
+    protected static void showMinecraftVersions(boolean ignoreCache) throws IOException {
         if (Universal.enableMinecraftFileCaching && Universal.minecraftVersions.isEmpty()){
             Universal.minecraftVersions = getMinecraftVersions();
             updateCacheFile();
@@ -186,7 +180,7 @@ public class UFI extends Application {
         List<String> assetClasses = Universal.enableMinecraftFileCaching ? Universal.minecraftVersions : getMinecraftVersions();
 
         Platform.runLater(() -> {
-            chooseMinecraftVersion.getItems().addAll(assetClasses);
+            chooseMinecraftVersion.getItems().setAll(assetClasses);
             if (Universal.defaultMinecraftVersion == 1){
                 chooseMinecraftVersion.setValue(assetClasses.getFirst());
             } else if (Universal.defaultMinecraftVersion == 2 && !Objects.equals(Universal.lastUsedMinecraftVersion, "null")){
@@ -201,7 +195,7 @@ public class UFI extends Application {
         });
     }
 
-    private void updateForgeVersions(boolean ignoreCache) throws IOException {
+    private static void updateForgeVersions(boolean ignoreCache) throws IOException {
         List<Pair<String, Byte>> assetClasses;
 
 
@@ -213,12 +207,14 @@ public class UFI extends Application {
 
         Platform.runLater(() -> {
             chooseForgeVersion.getItems().setAll(assetClasses);
-            System.out.println(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion));
-
             switch (Universal.defaultForgeVersion) {
                 case 0 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1))).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
                 case 1 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
                 case 2 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
+            }
+
+            if (minecraftVersion == null || minecraftVersion.replaceAll(" ", "").isEmpty()){
+                chooseForgeVersion.setValue(null);
             }
 
             if (Universal.enableForgeCaching) {
@@ -256,12 +252,12 @@ public class UFI extends Application {
         });
     }
 
-    private List<String> getMinecraftVersions() throws IOException {
+    private static List<String> getMinecraftVersions() throws IOException {
         updateStatusLabel((byte) 3);
         return Installer.getMinecraftVersionsForForge();
     }
 
-    private List<Pair<String, Byte>> getForgeVersions() throws IOException {
+    private static List<Pair<String, Byte>> getForgeVersions() throws IOException {
         updateStatusLabel((byte) 4);
 
         List<String> output = Installer.getForgeVersionsForMinecraft(minecraftVersion);
@@ -309,11 +305,11 @@ public class UFI extends Application {
         });
     }
 
-    private static void checkSettings() throws IOException {
+    protected static void checkSettings() throws IOException {
         System.out.println("Г Checking settings...");
 
-        if (!settingsFile.exists()) {
-            System.out.println("| Settings file do not exists at " + settingsPath);
+        if (!Universal.settingsFile.exists()) {
+            System.out.println("| Settings file do not exists at " + Universal.settingsPath);
 
             Universal.defaultMinecraftVersion = 0;
             Universal.defaultForgeVersion = 0;
@@ -327,11 +323,11 @@ public class UFI extends Application {
 
             updateSettingsFile();
 
-            System.out.println("| Settings file created: " + settingsPath);
+            System.out.println("| Settings file created: " + Universal.settingsPath);
         } else {
-            System.out.println("| Settings file already exists at " + settingsPath);
+            System.out.println("| Settings file already exists at " + Universal.settingsPath);
 
-            List<String> lines = Files.readAllLines(Paths.get(settingsPath));
+            List<String> lines = Files.readAllLines(Paths.get(Universal.settingsPath));
             String[] data;
 
             for (String line : lines) {
@@ -385,30 +381,30 @@ public class UFI extends Application {
         }
     }
 
-    private static void checkCache() throws IOException {
+    protected static void checkCache() throws IOException {
         System.out.println("Г Checking cache...");
 
-        if (!cacheFile.exists()){
-            System.out.println("| Cache file do not exists at " + cachePath);
+        if (!Universal.cacheFile.exists()){
+            System.out.println("| Cache file do not exists at " + Universal.cachePath);
             updateCacheFile();
         } else {
-            System.out.println("| Cache file already exists at " + cachePath);
+            System.out.println("| Cache file already exists at " + Universal.cachePath);
 
-            List<String> lines = Files.readAllLines(Paths.get(cachePath));
+            List<String> lines = Files.readAllLines(Paths.get(Universal.cachePath));
             String[] data;
 
             for (String line : lines){
                 if (line.contains("defaultMinecraftVersion")){
                     data = line.split("=");
-                    Universal.lastUsedMinecraftVersion = data[1];
+                    Universal.lastUsedMinecraftVersion = data.length >= 2 ? data[1] : null;
                 } else if (line.contains("minecraftToForgeVersions") && Universal.enableForgeFileCaching) {
                     data = line.split("=", 2);
-                    if (!Objects.equals(data[1], "{}")) {
+                    if (!Objects.equals(data[1].replaceAll(" ", ""), "{}")) {
                         parseToHashMap(data[1], Universal.minecraftToForgeVersions, true);
                     }
                 } else if (line.contains("minecraftToSpecifiedForgeVersions") && Universal.enableForgeFileCaching) {
                     data = line.split("=", 2);
-                    if (!Objects.equals(data[1], "{}")) {
+                    if (!Objects.equals(data[1].replaceAll(" ", ""), "{}")) {
                         parseToHashMap(data[1], Universal.minecraftToSpecifiedForgeVersions, false);
                     }
                 } else if (line.contains("minecraftVersions") && Universal.enableMinecraftFileCaching){
@@ -424,7 +420,7 @@ public class UFI extends Application {
     }
 
     protected static void updateSettingsFile() throws IOException {
-        try (FileWriter writer = new FileWriter(settingsFile)) {
+        try (FileWriter writer = new FileWriter(Universal.settingsFile)) {
             writer.write(String.format(
                     "defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersionByte=%d%n" +
                     "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b",
@@ -434,7 +430,7 @@ public class UFI extends Application {
     }
 
     protected static void updateCacheFile() throws IOException {
-        try (FileWriter writer = new FileWriter(cacheFile)){
+        try (FileWriter writer = new FileWriter(Universal.cacheFile)){
             writer.write(String.format("defaultMinecraftVersion=%s%nminecraftToForgeVersions=%s%nminecraftToSpecifiedForgeVersions=%s%nminecraftVersions=%s",
                     Universal.lastUsedMinecraftVersion, Universal.minecraftToForgeVersions, Universal.minecraftToSpecifiedForgeVersions, Universal.minecraftVersions));
         }

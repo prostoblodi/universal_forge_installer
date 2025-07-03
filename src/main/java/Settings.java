@@ -48,6 +48,9 @@ class Settings {
     private final ComboBox<Pair<String, Boolean>> enableCustomLaunch = new ComboBox<>();
     private final TextField minecraftFolderField = new TextField();
 
+    private final Button resetCacheButton = new Button("Reset cache");
+    private final Button resetSettingsButton = new Button("Reset settings");
+
     private final Stage stage = new Stage();
 
     public Settings() {
@@ -83,12 +86,13 @@ class Settings {
         folderFullBox.setAlignment(Pos.CENTER);
 
         Label mainLabel = new Label("Settings");
-        mainLabel.getStyleClass().add("main-label");
+        mainLabel.getStyleClass().add("label-main");
 
         VBox windowLayout = new VBox(
                 mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox,
                 createSeparator("Caching"), enableMinecraftFileCachingFullBox, enableForgeCachingFullBox, enableForgeCachingFileFullBox,
-                createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox
+                createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox,
+                createSeparator("Reset"), ButtonHBoxGenerator(resetCacheButton), ButtonHBoxGenerator(resetSettingsButton)
         );
 
         windowLayout.getStyleClass().add("settings-vbox");
@@ -99,6 +103,13 @@ class Settings {
 
         stage.setTitle("Settings");
         stage.setScene(scene);
+    }
+
+    private HBox ButtonHBoxGenerator(Button button){
+        button.getStyleClass().add("button");
+        HBox hbox = new HBox(button);
+        hbox.setAlignment(Pos.CENTER);
+        return hbox;
     }
 
     private <T> HBox ComboHBoxGenerator(Label label, ComboBox<T> comboBox){
@@ -143,6 +154,10 @@ class Settings {
                 }
             }
         });
+    }
+
+    private <K, T> Pair<String, T> getValue(List<Pair<String, T>> list, K setting){
+        return list.stream().filter(pair -> pair.getValue().equals(setting)).findFirst().orElse(new Pair<>("Unknown", null));
     }
 
     protected void show() {
@@ -238,13 +253,50 @@ class Settings {
                 throw new RuntimeException(e);
             }
         });
+
+        resetCacheButton.setOnAction((_) -> {
+            if (Universal.cacheFile.delete()) {
+                System.out.println("@ Cache file at " + Universal.cachePath + " deleted(cache reset successfully)");
+                Universal.minecraftVersions.clear();
+                Universal.lastUsedMinecraftVersion = "";
+                Universal.minecraftToForgeVersions.clear();
+                Universal.minecraftToSpecifiedForgeVersions.clear();
+
+                try {
+                    UFI.showMinecraftVersions(true);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                System.out.println("@ Cache file at " + Universal.cachePath + " isn't deleted(cache reset failed)");
+            }
+        });
+
+        resetSettingsButton.setOnAction((_) -> {
+            if (Universal.settingsFile.delete()){
+                System.out.println("@ Settings file at " + Universal.settingsPath + " deleted(settings reset)");
+
+                Universal.enableMinecraftFileCaching = false;
+                Universal.enableForgeCaching = false;
+                Universal.enableForgeFileCaching = false;
+                Universal.customForgeLaunch = true;
+                Universal.defaultMinecraftVersion = (byte) 0;
+                Universal.defaultForgeVersion = (byte) 0;
+                Universal.minecraftFolder = "";
+
+                try {
+                    UFI.updateSettingsFile();
+                    UFI.checkSettings();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                updateValues();
+            }
+        });
     }
 
-    private void initialize() {
-        Tooltip tooltip = new Tooltip();
-        tooltip.textProperty().bind(minecraftFolderField.textProperty());
-        Tooltip.install(minecraftFolderField, tooltip);
-
+    private void updateValues() {
         minecraftFolderField.setText(Universal.minecraftFolder);
 
         chooseDefaultForgeVersion.setValue(getValue(defaultForgeVersions, Universal.defaultForgeVersion));
@@ -255,6 +307,14 @@ class Settings {
         enableForgeFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeFileCaching));
 
         enableCustomLaunch.setValue(getValue(enableOrDisable, Universal.customForgeLaunch));
+    }
+
+    private void initialize() {
+        Tooltip tooltip = new Tooltip();
+        tooltip.textProperty().bind(minecraftFolderField.textProperty());
+        Tooltip.install(minecraftFolderField, tooltip);
+
+        updateValues();
 
         minecraftFolderField.setOnContextMenuRequested(Event::consume);
 
@@ -264,10 +324,6 @@ class Settings {
         initializeComboBox(enableForgeCacheChoose, enableOrDisable);
         initializeComboBox(enableForgeFileCacheChoose, enableOrDisable);
         initializeComboBox(enableCustomLaunch, enableOrDisable);
-    }
-
-    private <K, T> Pair<String, T> getValue(List<Pair<String, T>> list, K setting){
-        return list.stream().filter(pair -> pair.getValue().equals(setting)).findFirst().orElse(new Pair<>("Unknown", null));
     }
 
     private HBox createSeparator(String text) {

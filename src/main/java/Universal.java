@@ -1,5 +1,7 @@
 import javafx.util.Pair;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,12 +13,20 @@ public class Universal {
 
     protected static byte defaultMinecraftVersion;
     protected static byte defaultForgeVersion;
+
     protected static boolean enableMinecraftFileCaching;
     protected static boolean enableForgeCaching;
     protected static boolean enableForgeFileCaching;
     protected static boolean customForgeLaunch;
+
     protected static String minecraftFolder;
     protected static String lastUsedMinecraftVersion;
+
+    protected static String settingsPath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.settings"));
+    protected static String cachePath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.cache"));
+
+    protected static File settingsFile = new File(settingsPath);
+    protected static File cacheFile = new File(cachePath);
 
     protected static boolean isCacheEnabled() {
         return defaultMinecraftVersion == 2 || enableForgeCaching || enableForgeFileCaching || enableMinecraftFileCaching;
