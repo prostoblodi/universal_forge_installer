@@ -40,6 +40,14 @@ class Settings {
             new Pair<>("Oldest", (byte) 2)
     );
 
+    private final List<Pair<String, Byte>> timings = List.of(
+            new Pair<>("Never", (byte) 0),
+            new Pair<>("Every day", (byte) 1),
+            new Pair<>("Every week", (byte) 2),
+            new Pair<>("Every month", (byte) 3),
+            new Pair<>("Custom...", (byte) 4)
+    );
+
     private final ComboBox<Pair<String, Byte>> defaultMinecraftVersionChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Byte>> chooseDefaultForgeVersion = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableMinecraftFileCacheChoose = new ComboBox<>();
@@ -56,16 +64,8 @@ class Settings {
     public Settings() {
         System.out.println("@ Settings launched!");
 
-        Button minecraftFolderButton = new Button("...");
-
         initialize();
         setActions();
-
-        minecraftFolderButton.setOnAction((_) -> {
-            String s = String.valueOf(new DirectoryChooser().showDialog(new Stage()));
-            if (Objects.equals(s, "null")){s = "";}
-            minecraftFolderField.setText(s);
-        });
 
         HBox defaultMinecraftVersionFullBox = ComboHBoxGenerator( new Label("Default minecraft version:"), defaultMinecraftVersionChoose);
         HBox defaultForgeVersionFullBox = ComboHBoxGenerator(new Label("Default forge version:"), chooseDefaultForgeVersion);
@@ -73,17 +73,7 @@ class Settings {
         HBox enableForgeCachingFullBox = ComboHBoxGenerator(new Label("Cache forge versions:"), enableForgeCacheChoose);
         HBox enableForgeCachingFileFullBox = ComboHBoxGenerator(new Label("Cache forge versions to file:"), enableForgeFileCacheChoose);
         HBox customForgeLaunchFullBox = ComboHBoxGenerator(new Label("Enable custom forge launch: "), enableCustomLaunch);
-
-        HBox folderChoose = new HBox(minecraftFolderField, minecraftFolderButton);
-        folderChoose.setAlignment(Pos.CENTER);
-        folderChoose.setSpacing(10);
-
-        VBox folderLabel = new VBox(new Label("Choose minecraft folder: "));
-        folderLabel.setAlignment(Pos.CENTER);
-
-        HBox folderFullBox = new HBox(folderLabel, new Region(), folderChoose);
-        HBox.setHgrow(folderFullBox.getChildren().get(1), Priority.ALWAYS);
-        folderFullBox.setAlignment(Pos.CENTER);
+        HBox folderFullBox = createFolderChooseHBox();
 
         Label mainLabel = new Label("Settings");
         mainLabel.getStyleClass().add("label-main");
@@ -97,12 +87,35 @@ class Settings {
 
         windowLayout.getStyleClass().add("settings-vbox");
 
-
         Scene scene = new Scene(windowLayout);
         scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles.css")).toExternalForm());
 
         stage.setTitle("Settings");
         stage.setScene(scene);
+    }
+
+    private HBox createFolderChooseHBox(){
+        Button minecraftFolderButton = new Button("...");
+
+        minecraftFolderButton.setOnAction((_) -> {
+            String s = String.valueOf(new DirectoryChooser().showDialog(new Stage()));
+            if (Objects.equals(s, "null")){s = "";}
+            minecraftFolderField.setText(s);
+        });
+
+        HBox folderChoose = new HBox(minecraftFolderField, minecraftFolderButton);
+        folderChoose.setAlignment(Pos.CENTER);
+        folderChoose.setSpacing(10);
+
+        VBox folderLabel = new VBox(new Label("Choose minecraft folder: "));
+        folderLabel.setAlignment(Pos.CENTER);
+        folderLabel.getStyleClass().add("settings-label");
+
+        HBox folderFullBox = new HBox(folderLabel, new Region(), folderChoose);
+        HBox.setHgrow(folderFullBox.getChildren().get(1), Priority.ALWAYS);
+        folderFullBox.setAlignment(Pos.CENTER);
+
+        return folderFullBox;
     }
 
     private HBox ButtonHBoxGenerator(Button button){
@@ -228,6 +241,7 @@ class Settings {
         enableCustomLaunch.setOnAction((_) -> {
             Universal.customForgeLaunch = enableCustomLaunch.getValue().getValue();
             System.out.println("@ Forge custom launch changed to: " + Universal.customForgeLaunch);
+
 
             try {
                 UFI.updateSettingsFile();
