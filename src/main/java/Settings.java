@@ -286,9 +286,25 @@ class Settings {
             customTimingsHBox.setVisible(Universal.baseTimings == 8);
             customTimingsHBox.setManaged(Universal.baseTimings == 8);
 
+            if (Universal.baseTimings != 8) {Updater.setTiming(Universal.baseTimings);}
+
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        customTimingsChoose.setOnAction((_) -> {
+            Universal.customTimings = new Pair<>(Universal.customTimings.getKey(), customTimingsChoose.getValue().getValue());
+            System.out.println("@ Custom timing is now: " + Universal.customTimings);
+
+            Updater.setCustomTiming(Universal.customTimings);
+
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
                 throw new RuntimeException(e);
             }
         });
@@ -314,6 +330,20 @@ class Settings {
         minecraftFolderField.textProperty().addListener((_, _, _) -> {
             Universal.minecraftFolder = minecraftFolderField.getText();
             System.out.println("@ Minecraft folder changed to: " + Universal.minecraftFolder);
+
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
+                throw new RuntimeException(e);
+            }
+        });
+
+        timingsField.textProperty().addListener((_, _, _) -> {
+            Universal.customTimings = new Pair<>(Short.parseShort(timingsField.getText()), customTimingsChoose.getValue().getValue());
+            System.out.println("@ Custom timing is now: " + Universal.customTimings);
+
+            Updater.setCustomTiming(Universal.customTimings);
 
             try {
                 UFI.updateSettingsFile();
@@ -352,6 +382,8 @@ class Settings {
                 Universal.defaultMinecraftVersion = (byte) 0;
                 Universal.defaultForgeVersion = (byte) 0;
                 Universal.minecraftFolder = "";
+                Universal.customTimings = new Pair<>((short) 1, (byte) 1);
+                Universal.baseTimings = 0;
 
                 try {
                     UFI.updateSettingsFile();
@@ -367,7 +399,7 @@ class Settings {
 
     private void updateValues() {
         minecraftFolderField.setText(Universal.minecraftFolder);
-//        timingsField.setText(String.valueOf(Universal.customTimings.getKey()));
+        timingsField.setText(String.valueOf(Universal.customTimings.getKey()));
 
         chooseDefaultForgeVersion.setValue(getValue(defaultForgeVersions, Universal.defaultForgeVersion));
         defaultMinecraftVersionChoose.setValue(getValue(defaultMinecraftVersions, Universal.defaultMinecraftVersion));
@@ -376,7 +408,7 @@ class Settings {
         enableForgeCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeCaching));
         enableForgeFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeFileCaching));
         timingsChoose.setValue(getValue(timings, Universal.baseTimings));
-//        customTimingsChoose.setValue(getValue(customTimings, Universal.customTimings.getValue()));
+        customTimingsChoose.setValue(getValue(customTimings, Universal.customTimings.getValue()));
 
         enableCustomLaunch.setValue(getValue(enableOrDisable, Universal.customForgeLaunch));
     }

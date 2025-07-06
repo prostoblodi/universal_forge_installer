@@ -31,7 +31,7 @@ public class Universal {
     protected static File cacheFile = new File(cachePath);
 
     protected static boolean isCacheEnabled() {
-        return defaultMinecraftVersion == 2 || enableForgeCaching || enableForgeFileCaching || enableMinecraftFileCaching;
+        return defaultMinecraftVersion == 2 || enableForgeCaching || enableForgeFileCaching || enableMinecraftFileCaching || baseTimings == 8;
     }
 
     /**

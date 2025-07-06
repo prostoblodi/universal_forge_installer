@@ -18,6 +18,7 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.*;
 
 public class UFI extends Application {
@@ -47,9 +48,14 @@ public class UFI extends Application {
     public void start(Stage primaryStage) throws IOException {
         statusLabel.textProperty().bind(textProperty);
 
+        Universal.customTimings = new Pair<>((short) 1, (byte) 1); // just to prevent null
+
         setLBStyles();
         checkSettings();
-        if (Universal.isCacheEnabled()) {checkCache();}
+        if (Universal.isCacheEnabled()) {
+            checkCache();
+            Updater.checkUpdates();
+        }
 
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
@@ -363,6 +369,9 @@ public class UFI extends Application {
                 } else if (line.contains("baseTimings")){
                     data = line.split("=");
                     Universal.baseTimings = Byte.parseByte(data[1]);
+                } else if (line.contains("customTimings")) {
+                    data = line.split("=");
+                    Universal.customTimings = new Pair<>(Short.parseShort(data[1]), Byte.parseByte(data[2]));
                 }
             }
         }
@@ -371,10 +380,10 @@ public class UFI extends Application {
                 "* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%n" +
                 "| minecraftFolder: %s, defaultMinecraftVersion: %d,%n" +
                 "| enableForgeCache: %b, enableForgeFileCache: %b,%n" +
-                "L enableMinecraftFileCaching: %b, baseTimings: %b%n%n",
+                "L enableMinecraftFileCaching: %b, baseTimings: %b, customTimings: %s%n%n",
                 Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder,
                 Universal.defaultForgeVersion, Universal.enableForgeCaching, Universal.enableForgeFileCaching,
-                Universal.enableMinecraftFileCaching, Universal.baseTimings
+                Universal.enableMinecraftFileCaching, Universal.baseTimings, Universal.customTimings
         );
 
         if (Universal.customForgeLaunch) {
@@ -415,6 +424,9 @@ public class UFI extends Application {
                     for (String i : data[1].replace("[", "").replace("]", "").split(",")){
                         Universal.minecraftVersions.add(i.replaceAll(" ", ""));
                     }
+                } else if (line.contains("lastRun")) {
+                    data = line.split("=");
+                    Updater.lastRun = Instant.ofEpochMilli(Long.parseLong(data[1]));
                 }
             }
         }
@@ -426,16 +438,18 @@ public class UFI extends Application {
         try (FileWriter writer = new FileWriter(Universal.settingsFile)) {
             writer.write(String.format(
                     "defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersionByte=%d%n" +
-                    "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b%nbaseTimings=%d",
+                    "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b%nbaseTimings=%d%ncustomTimings=%s",
                     Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder, Universal.defaultMinecraftVersion,
-                    Universal.enableForgeCaching, Universal.enableForgeFileCaching, Universal.enableMinecraftFileCaching, Universal.baseTimings));
+                    Universal.enableForgeCaching, Universal.enableForgeFileCaching, Universal.enableMinecraftFileCaching, Universal.baseTimings,
+                    Universal.customTimings
+            ));
         }
     }
 
     protected static void updateCacheFile() throws IOException {
         try (FileWriter writer = new FileWriter(Universal.cacheFile)){
-            writer.write(String.format("defaultMinecraftVersion=%s%nminecraftToForgeVersions=%s%nminecraftToSpecifiedForgeVersions=%s%nminecraftVersions=%s",
-                    Universal.lastUsedMinecraftVersion, Universal.minecraftToForgeVersions, Universal.minecraftToSpecifiedForgeVersions, Universal.minecraftVersions));
+            writer.write(String.format("defaultMinecraftVersion=%s%nminecraftToForgeVersions=%s%nminecraftToSpecifiedForgeVersions=%s%nminecraftVersions=%s%nlastRun=%s",
+                    Universal.lastUsedMinecraftVersion, Universal.minecraftToForgeVersions, Universal.minecraftToSpecifiedForgeVersions, Universal.minecraftVersions, Updater.lastRun.toEpochMilli()));
         }
     }
 
