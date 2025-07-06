@@ -13,6 +13,8 @@ public class Universal {
 
     protected static byte defaultMinecraftVersion;
     protected static byte defaultForgeVersion;
+    protected static byte baseTimings;
+    protected static Pair<Short, Byte> customTimings;
 
     protected static boolean enableMinecraftFileCaching;
     protected static boolean enableForgeCaching;

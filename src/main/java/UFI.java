@@ -360,6 +360,9 @@ public class UFI extends Application {
                 } else if (line.contains("enableMinecraftFileCaching")){
                     data = line.split("=");
                     Universal.enableMinecraftFileCaching = Boolean.parseBoolean(data[1]);
+                } else if (line.contains("baseTimings")){
+                    data = line.split("=");
+                    Universal.baseTimings = Byte.parseByte(data[1]);
                 }
             }
         }
@@ -368,10 +371,10 @@ public class UFI extends Application {
                 "* Saved settings as: defaultForgeVersion: %d, customForgeLaunch: %b,%n" +
                 "| minecraftFolder: %s, defaultMinecraftVersion: %d,%n" +
                 "| enableForgeCache: %b, enableForgeFileCache: %b,%n" +
-                "L enableMinecraftFileCaching: %b%n%n",
+                "L enableMinecraftFileCaching: %b, baseTimings: %b%n%n",
                 Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder,
                 Universal.defaultForgeVersion, Universal.enableForgeCaching, Universal.enableForgeFileCaching,
-                Universal.enableMinecraftFileCaching
+                Universal.enableMinecraftFileCaching, Universal.baseTimings
         );
 
         if (Universal.customForgeLaunch) {
@@ -423,9 +426,9 @@ public class UFI extends Application {
         try (FileWriter writer = new FileWriter(Universal.settingsFile)) {
             writer.write(String.format(
                     "defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersionByte=%d%n" +
-                    "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b",
+                    "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b%nbaseTimings=%d",
                     Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder, Universal.defaultMinecraftVersion,
-                    Universal.enableForgeCaching, Universal.enableForgeFileCaching, Universal.enableMinecraftFileCaching));
+                    Universal.enableForgeCaching, Universal.enableForgeFileCaching, Universal.enableMinecraftFileCaching, Universal.baseTimings));
         }
     }
 

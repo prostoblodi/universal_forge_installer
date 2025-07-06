@@ -2,13 +2,7 @@ import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.Separator;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -45,16 +39,36 @@ class Settings {
             new Pair<>("Every day", (byte) 1),
             new Pair<>("Every week", (byte) 2),
             new Pair<>("Every month", (byte) 3),
-            new Pair<>("Custom...", (byte) 4)
+            new Pair<>("Every year", (byte) 4),
+            new Pair<>("Every decade", (byte) 5),
+            new Pair<>("Every century", (byte) 6),
+            new Pair<>("Every millennium", (byte) 7),
+            new Pair<>("Custom...", (byte) 8)
     );
+
+    private final List<Pair<String, Byte>> customTimings = List.of(
+            new Pair<>("hours", (byte) 0),
+            new Pair<>("days", (byte) 1),
+            new Pair<>("weeks", (byte) 2),
+            new Pair<>("years", (byte) 3),
+            new Pair<>("decades", (byte) 4),
+            new Pair<>("centuries", (byte) 5),
+            new Pair<>("millenniums", (byte) 6)
+    );
+
+    HBox customTimingsHBox;
 
     private final ComboBox<Pair<String, Byte>> defaultMinecraftVersionChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Byte>> chooseDefaultForgeVersion = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableMinecraftFileCacheChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableForgeCacheChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableForgeFileCacheChoose = new ComboBox<>();
+    private final ComboBox<Pair<String, Byte>> timingsChoose = new ComboBox<>();
+    private final ComboBox<Pair<String, Byte>> customTimingsChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Boolean>> enableCustomLaunch = new ComboBox<>();
+
     private final TextField minecraftFolderField = new TextField();
+    private final TextField timingsField = new TextField();
 
     private final Button resetCacheButton = new Button("Reset cache");
     private final Button resetSettingsButton = new Button("Reset settings");
@@ -72,8 +86,13 @@ class Settings {
         HBox enableMinecraftFileCachingFullBox = ComboHBoxGenerator(new Label("Cache minecraft versions into file:"), enableMinecraftFileCacheChoose);
         HBox enableForgeCachingFullBox = ComboHBoxGenerator(new Label("Cache forge versions:"), enableForgeCacheChoose);
         HBox enableForgeCachingFileFullBox = ComboHBoxGenerator(new Label("Cache forge versions to file:"), enableForgeFileCacheChoose);
-        HBox customForgeLaunchFullBox = ComboHBoxGenerator(new Label("Enable custom forge launch: "), enableCustomLaunch);
+        HBox enableTimings = ComboHBoxGenerator(new Label("Enable versions list auto-update: "), timingsChoose); // Утфиду фгещ-гзвфеу ща мукышщты дшые...
+        HBox customForgeLaunchFullBox = ComboHBoxGenerator(new Label("Enable custom forge launch:"), enableCustomLaunch);
         HBox folderFullBox = createFolderChooseHBox();
+        customTimingsHBox = createCustomTimingsChoose(new Label("Update frequency:"), new Label("every"));
+
+        customTimingsHBox.setVisible(Universal.baseTimings == 8);
+        customTimingsHBox.setManaged(Universal.baseTimings == 8);
 
         Label mainLabel = new Label("Settings");
         mainLabel.getStyleClass().add("label-main");
@@ -81,6 +100,7 @@ class Settings {
         VBox windowLayout = new VBox(
                 mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox,
                 createSeparator("Caching"), enableMinecraftFileCachingFullBox, enableForgeCachingFullBox, enableForgeCachingFileFullBox,
+                enableTimings, customTimingsHBox,
                 createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox,
                 createSeparator("Reset"), ButtonHBoxGenerator(resetCacheButton), ButtonHBoxGenerator(resetSettingsButton)
         );
@@ -92,6 +112,32 @@ class Settings {
 
         stage.setTitle("Settings");
         stage.setScene(scene);
+    }
+
+    private HBox createCustomTimingsChoose(Label label, Label label2){
+        label.getStyleClass().add("settings-label");
+        label.setAlignment(Pos.CENTER_LEFT);
+        label2.setAlignment(Pos.CENTER_RIGHT);
+
+        customTimingsChoose.getStyleClass().add("combo-box");
+        timingsField.setPrefWidth(50);
+
+        TextFormatter<String> formatter = new TextFormatter<>(change -> {
+            if (change.getControlNewText().length() <= 4) {
+                return change;
+            } else {
+                return null;
+            }
+        });
+
+        timingsField.setTextFormatter(formatter);
+
+        HBox fullBox = new HBox(label, new Region(), label2, timingsField, customTimingsChoose);
+        HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
+        fullBox.setAlignment(Pos.CENTER);
+        fullBox.setSpacing(10);
+
+        return fullBox;
     }
 
     private HBox createFolderChooseHBox(){
@@ -127,12 +173,7 @@ class Settings {
 
     private <T> HBox ComboHBoxGenerator(Label label, ComboBox<T> comboBox){
         label.getStyleClass().add("settings-label");
-        VBox labelBox = new VBox(label);
-        labelBox.setAlignment(Pos.CENTER_LEFT);
-
         comboBox.getStyleClass().add("combo-box");
-        VBox comboBoxBox = new VBox(comboBox);
-        comboBoxBox.setAlignment(Pos.CENTER_RIGHT);
 
         HBox fullBox = new HBox(label, new Region(), comboBox);
         HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
@@ -238,6 +279,20 @@ class Settings {
             }
         });
 
+        timingsChoose.setOnAction((_) -> {
+            Universal.baseTimings = timingsChoose.getValue().getValue();
+            System.out.println("@ Enable versions list auto-update is now: " + Universal.baseTimings);
+
+            customTimingsHBox.setVisible(Universal.baseTimings == 8);
+            customTimingsHBox.setManaged(Universal.baseTimings == 8);
+
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         enableCustomLaunch.setOnAction((_) -> {
             Universal.customForgeLaunch = enableCustomLaunch.getValue().getValue();
             System.out.println("@ Forge custom launch changed to: " + Universal.customForgeLaunch);
@@ -312,6 +367,7 @@ class Settings {
 
     private void updateValues() {
         minecraftFolderField.setText(Universal.minecraftFolder);
+//        timingsField.setText(String.valueOf(Universal.customTimings.getKey()));
 
         chooseDefaultForgeVersion.setValue(getValue(defaultForgeVersions, Universal.defaultForgeVersion));
         defaultMinecraftVersionChoose.setValue(getValue(defaultMinecraftVersions, Universal.defaultMinecraftVersion));
@@ -319,6 +375,8 @@ class Settings {
         enableMinecraftFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableMinecraftFileCaching));
         enableForgeCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeCaching));
         enableForgeFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeFileCaching));
+        timingsChoose.setValue(getValue(timings, Universal.baseTimings));
+//        customTimingsChoose.setValue(getValue(customTimings, Universal.customTimings.getValue()));
 
         enableCustomLaunch.setValue(getValue(enableOrDisable, Universal.customForgeLaunch));
     }
@@ -338,6 +396,8 @@ class Settings {
         initializeComboBox(enableForgeCacheChoose, enableOrDisable);
         initializeComboBox(enableForgeFileCacheChoose, enableOrDisable);
         initializeComboBox(enableCustomLaunch, enableOrDisable);
+        initializeComboBox(timingsChoose, timings);
+        initializeComboBox(customTimingsChoose, customTimings);
     }
 
     private HBox createSeparator(String text) {
