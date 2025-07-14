@@ -4,7 +4,7 @@
     -fx-alignment: center; /* Objects alignment */
     -fx-padding: 30; /* Distance between objects and window border */
     -fx-background-color: #242424; /* Window background colour */
-    -fx-pref-width: 410; /* Preferred width */
+    -fx-pref-width: 450; /* Preferred width */
 }
 
 /* Settings window style */
@@ -46,15 +46,54 @@
     -fx-alignment: center; /* Positioning the text relative to the window */
     -fx-font-size: 14px; /* Text size */
     -fx-pref-width: 180; /* Preferred width */
-    -fx-pref-height: 14;
+    -fx-pref-height: 14; /* Preferred height */
 }
 
 /* Buttons style */
 .button {
-    -fx-alignment: center; /* Positioning the text relative to the window */
-    -fx-background-color: #383838; /* Button colour */
+    -fx-alignment: center;
+    -fx-background-color: #383838; /* Default button colour */
     -fx-text-fill: #F0F0F0; /* Text colour */
-    -fx-font-size: 14px; /* Font size */
+    -fx-font-size: 14px; /* Text size */
+    -fx-background-radius: 4px; /* Rounding radius of the button */
+}
+
+/* Theme button style */
+.theme-button {
+    -fx-background-image: url("day.png");
+    -fx-background-size: 25px 25px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-alignment: center;
+    -fx-background-color: #383838; /* Default button colour */
+    -fx-background-radius: 4px; /* Rounding radius of the button */
+    -fx-pref-width: 44; /* Preferred width */
+    -fx-pref-height: 44; /* Preferred height */
+}
+
+/* Reload button style */
+.reload-button {
+    -fx-background-image: url("reload-dark.png");
+    -fx-background-size: 25px 25px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-alignment: center;
+    -fx-background-color: #383838;
+    -fx-background-radius: 4px;
+    -fx-pref-width: 44; /* Preferred width */
+    -fx-pref-height: 44; /* Preferred height */
+}
+
+/* Hovered button */
+.button:hover {
+    -fx-background-color: #4a4a4a; /* Slightly lighter on hover */
+    -fx-text-fill: #ffffff; /* Slightly brighter text */
+}
+
+/* Pressed button */
+.button:pressed {
+    -fx-background-color: #5a5a5a; /* Even lighter on press */
+    -fx-text-fill: #ffffff;
 }
 
 /* Versions choose box style */

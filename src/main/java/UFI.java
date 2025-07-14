@@ -1,16 +1,14 @@
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -23,7 +21,8 @@ import java.util.*;
 
 public class UFI extends Application {
 
-    private final Button reload = new Button("", new ImageView(new Image("reload.png", 24, 24, true, true)));
+    private final Button reload = new Button();
+    private final Button theme = new Button();
 
     private static final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
     private static final ComboBox<Pair<String, Byte>> chooseForgeVersion = new ComboBox<>();
@@ -46,16 +45,7 @@ public class UFI extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        statusLabel.textProperty().bind(textProperty);
-
-        Universal.customTimings = new Pair<>((short) 1, (byte) 1); // just to prevent null
-
-        setLBStyles();
         checkSettings();
-        if (Universal.isCacheEnabled()) {
-            checkCache();
-            Updater.checkUpdates();
-        }
 
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
@@ -67,17 +57,25 @@ public class UFI extends Application {
         gp.setVgap(10);
         gp.setAlignment(Pos.CENTER);
 
-        VBox vbox = new VBox(mainLabel, gp, downloadButton, settingsButton, statusLabel);
-        vbox.getStyleClass().add("vbox");
+        statusLabel.setMinWidth(200);
+        statusLabel.setAlignment(Pos.CENTER);
+
+        BorderPane down = new BorderPane();
+        BorderPane.setMargin(statusLabel, new Insets(0, 0, 0, 40));
+        down.setCenter(statusLabel);
+        down.setRight(theme);
+
+        VBox vbox = new VBox(mainLabel, gp, downloadButton, settingsButton, down);
 
         Scene scene = new Scene(vbox);
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles.css")).toExternalForm());
 
-        setActions();
+        initialize(scene, vbox);
 
         primaryStage.setTitle("Universal Forge Installer");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        setLBStyles();
 
         new Thread(() -> {
             try {
@@ -96,6 +94,24 @@ public class UFI extends Application {
         }).start();
     }
 
+    private void initialize(Scene scene, VBox vbox) throws IOException {
+        setActions(scene);
+
+        statusLabel.textProperty().bind(textProperty);
+        vbox.getStyleClass().add("vbox");
+
+        if (Universal.isDarkMode) {
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
+        } else {
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-light.css")).toExternalForm());
+        }
+
+        if (Universal.isCacheEnabled()) {
+            checkCache();
+            Updater.checkUpdates();
+        }
+    }
+
     private void setLBStyles() { // LB means Labels and Buttons
         mainLabel.getStyleClass().add("label-main");
         minecraftVersionLabel.getStyleClass().add("label");
@@ -104,9 +120,11 @@ public class UFI extends Application {
         downloadButton.getStyleClass().add("button");
         settingsButton.getStyleClass().add("button");
         statusLabel.getStyleClass().add("status-label");
+        reload.getStyleClass().add("reload-button");
+        theme.getStyleClass().add("theme-button");
     }
 
-    private void setActions() {
+    private void setActions(Scene scene) {
         chooseMinecraftVersion.setOnAction(
                 (_) -> new Thread(() -> {
                     try {
@@ -158,8 +176,26 @@ public class UFI extends Application {
                     UFI.updateStatusLabel((byte) 5);
                     throw new RuntimeException(e);
                 }
-            }).start()
-        );
+            }).start());
+
+        theme.setOnAction((_) -> {
+            Universal.isDarkMode = !Universal.isDarkMode;
+
+            try {
+                updateSettingsFile();
+            } catch (IOException e) {
+                updateStatusLabel((byte) 5);
+                throw new RuntimeException(e);
+            }
+
+            scene.getStylesheets().clear();
+
+            if (Universal.isDarkMode) {
+                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
+            } else {
+                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-light.css")).toExternalForm());
+            }
+        });
     }
 
     private static void saveMinecraftVersion(boolean ignoreCache) throws IOException {
@@ -372,6 +408,9 @@ public class UFI extends Application {
                 } else if (line.contains("customTimings")) {
                     data = line.split("=");
                     Universal.customTimings = new Pair<>(Short.parseShort(data[1]), Byte.parseByte(data[2]));
+                } else if (line.contains("isDarkMode")) {
+                    data = line.split("=");
+                    Universal.isDarkMode = Boolean.parseBoolean(data[1]);
                 }
             }
         }
@@ -438,10 +477,11 @@ public class UFI extends Application {
         try (FileWriter writer = new FileWriter(Universal.settingsFile)) {
             writer.write(String.format(
                     "defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersionByte=%d%n" +
-                    "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b%nbaseTimings=%d%ncustomTimings=%s",
+                    "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b%nbaseTimings=%d%ncustomTimings=%s%n" +
+                    "isDarkMode=%b",
                     Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder, Universal.defaultMinecraftVersion,
                     Universal.enableForgeCaching, Universal.enableForgeFileCaching, Universal.enableMinecraftFileCaching, Universal.baseTimings,
-                    Universal.customTimings
+                    Universal.customTimings, Universal.isDarkMode
             ));
         }
     }

@@ -108,8 +108,12 @@ class Settings {
         windowLayout.getStyleClass().add("settings-vbox");
 
         Scene scene = new Scene(windowLayout);
-        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles.css")).toExternalForm());
 
+        if (Universal.isDarkMode) {
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
+        } else {
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-light.css")).toExternalForm());
+        }
         stage.setTitle("Settings");
         stage.setScene(scene);
     }

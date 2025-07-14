@@ -1,0 +1,164 @@
+/* Window style */
+.vbox {
+    -fx-spacing: 10.0; /* Distance between objects */
+    -fx-alignment: center; /* Objects alignment */
+    -fx-padding: 30; /* Distance between objects and window border */
+    -fx-background-color: #f5f5f5; /* Window background colour */
+    -fx-pref-width: 450; /* Preferred width */
+}
+
+/* Settings window style */
+.settings-vbox {
+    -fx-spacing: 10.0; /* Distance between objects */
+    -fx-alignment: center; /* Objects alignment */
+    -fx-padding: 30; /* Distance between objects and window border */
+    -fx-background-color: #f5f5f5; /* Window background colour */
+    -fx-pref-width: 500; /* Preferred width */
+}
+
+/* Universal Forge Installer style */
+.label-main {
+    -fx-alignment: center; /* Positioning the text relative to the window */
+    -fx-font-size: 16px; /* Size of font */
+    -fx-text-fill: #2e3436; /* Text colour */
+}
+
+/* Minecraft and Forge versions text style */
+.label {
+    -fx-text-fill: #2e3436;/* Text colour */
+}
+
+/* Settings text style */
+.settings-label {
+    -fx-text-fill: #2e3436; /* Text colour */
+    -fx-font-size: 14px; /* Size of font */
+}
+
+/* Text field style */
+.text-field {
+    -fx-text-fill: #2e3436; /* Text colour */
+    -fx-background-color: #ffffff; /* Text field colour */
+    -fx-background-radius: 3px;
+}
+
+/* Status label style */
+.status-label {
+    -fx-text-fill: #2e3436; /* Text colour */
+    -fx-alignment: center; /* Positioning the text relative to the window */
+    -fx-font-size: 14px; /* Text size */
+    -fx-pref-width: 180; /* Preferred width */
+}
+
+/* Buttons style */
+.button {
+    -fx-alignment: center;
+    -fx-background-color: #e0e0e0; /* Default button colour */
+    -fx-text-fill: #2e3436; /* Text colour */
+    -fx-font-size: 14px; /* Text size */
+    -fx-background-radius: 4px; /* Rounding radius of the button */
+}
+
+/* Theme button style */
+.theme-button {
+    -fx-background-image: url("night.png");
+    -fx-background-size: 25px 25px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-alignment: center;
+    -fx-background-color: #e0e0e0; /* Default button colour */
+    -fx-background-radius: 4px; /* Rounding radius of the button */
+    -fx-pref-width: 44; /* Preferred width */
+    -fx-pref-height: 44; /* Preferred height */
+}
+
+/* Reload button style */
+.reload-button {
+    -fx-background-image: url("reload-light.png");
+    -fx-background-size: 25px 25px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-alignment: center;
+    -fx-background-color: #e0e0e0;
+    -fx-background-radius: 4px;
+    -fx-pref-width: 44; /* Preferred width */
+    -fx-pref-height: 44; /* Preferred height */
+}
+
+/* Buttons hover style */
+.button:hover {
+    -fx-background-color: #d0d0d0; /* Hover button colour */
+}
+
+/* Buttons click style */
+.button:pressed {
+    -fx-background-color: #bcbcbc; /* Click button colour */
+}
+
+
+/* Versions choose box style */
+.combo-box {
+    -fx-background-color: #ffffff; /* Box colour */
+    -fx-alignment: left; /* Positioning the text relative to the window */
+}
+
+/* Versions choose box list cell style */
+.combo-box .list-cell {
+    -fx-background-color: #ffffff; /* Box colour */
+    -fx-text-fill: #2e3436; /* Text colour */
+    -fx-background-radius: 4px; /* Rounding radius of the box */
+}
+
+/* The style of the list that drops down after clicking on the box */
+.combo-box .list-view {
+    -fx-background-color: #f0f0f0; /* List colour */
+}
+
+/* Default cell style in list */
+.combo-box .list-view .list-cell {
+    -fx-background-color: #f0f0f0; /* Cell colour */
+    -fx-text-fill: #2e3436; /* Text colour */
+}
+
+/* Cell color in list when hovering */
+.combo-box .list-view .list-cell:hover {
+    -fx-background-color: #d3d7cf; /* Cell hover colour */
+    -fx-text-fill: #2e3436; /* Text colour */
+    -fx-background-radius: 4px; /* Rounding radius of the cell */
+}
+
+/* Cell color in list when clicked */
+.combo-box .list-view .list-cell:selected {
+    -fx-background-color: #babdb6; /* Cell click colour */
+    -fx-text-fill: #2e3436; /* Text colour */
+    -fx-background-radius: 4px; /* Rounding radius of the cell */
+}
+
+/* Scroll bar style */
+.combo-box-popup .scroll-bar:vertical{
+     -fx-background-color: #d3d7cf; /* Scroll bar colour */
+     -fx-background-radius: 5px; /* Rounding radius */
+}
+
+/* Scroll bar thumb style */
+.combo-box-popup .scroll-bar:vertical .thumb {
+    -fx-background-color: #babdb6; /* Thumb colour */
+    -fx-background-radius: 5px; /* Rounding radius of the thumb */
+}
+
+/* The style of the track area that thumb moves around in */
+.combo-box-popup .scroll-bar:vertical .track {
+    -fx-background-color: #d3d7cf; /* Area colour */
+    -fx-background-radius: 5px; /* Rounding radius of the area */
+}
+
+/* Buttons with arrows */
+.combo-box-popup .scroll-bar:vertical .increment-button,
+.combo-box-popup .scroll-bar:vertical .decrement-button {
+    -fx-background-color: #d3d7cf; /* Button colour */
+}
+
+/* Arrows in buttons */
+.combo-box-popup .scroll-bar:vertical .increment-arrow,
+.combo-box-popup .scroll-bar:vertical .decrement-arrow {
+    -fx-background-color: #babdb6; /* Arrow colour */
+}

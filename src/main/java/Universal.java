@@ -14,12 +14,13 @@ public class Universal {
     protected static byte defaultMinecraftVersion;
     protected static byte defaultForgeVersion;
     protected static byte baseTimings;
-    protected static Pair<Short, Byte> customTimings;
+    protected static Pair<Short, Byte> customTimings = new Pair<>((short) 1, (byte) 1); // just to prevent null
 
     protected static boolean enableMinecraftFileCaching;
     protected static boolean enableForgeCaching;
     protected static boolean enableForgeFileCaching;
     protected static boolean customForgeLaunch;
+    protected static boolean isDarkMode = false;
 
     protected static String minecraftFolder;
     protected static String lastUsedMinecraftVersion;
