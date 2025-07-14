@@ -2,9 +2,7 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Universal {
     protected static List<String> minecraftVersions = new ArrayList<>();

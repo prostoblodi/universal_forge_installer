@@ -12,16 +12,22 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 public class UFI extends Application {
 
-    private final Button reload = new Button();
+    private static final Button reload = new Button();
     private final Button theme = new Button();
 
     private static final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
@@ -38,6 +44,8 @@ public class UFI extends Application {
 
     protected static final Button downloadButton = new Button("Download & Launch");
     private final Button settingsButton = new Button("Settings");
+
+    protected static Scene scene;
 
     public static void main(String[] args) {
         launch(args);
@@ -67,9 +75,9 @@ public class UFI extends Application {
 
         VBox vbox = new VBox(mainLabel, gp, downloadButton, settingsButton, down);
 
-        Scene scene = new Scene(vbox);
+        scene = new Scene(vbox);
 
-        initialize(scene, vbox);
+        initialize(vbox);
 
         primaryStage.setTitle("Universal Forge Installer");
         primaryStage.setScene(scene);
@@ -94,8 +102,8 @@ public class UFI extends Application {
         }).start();
     }
 
-    private void initialize(Scene scene, VBox vbox) throws IOException {
-        setActions(scene);
+    private void initialize(VBox vbox) throws IOException {
+        setActions();
 
         statusLabel.textProperty().bind(textProperty);
         vbox.getStyleClass().add("vbox");
@@ -110,6 +118,8 @@ public class UFI extends Application {
             checkCache();
             Updater.checkUpdates();
         }
+
+        updateReloadButton();
     }
 
     private void setLBStyles() { // LB means Labels and Buttons
@@ -124,7 +134,7 @@ public class UFI extends Application {
         theme.getStyleClass().add("theme-button");
     }
 
-    private void setActions(Scene scene) {
+    private void setActions() {
         chooseMinecraftVersion.setOnAction(
                 (_) -> new Thread(() -> {
                     try {
@@ -188,13 +198,7 @@ public class UFI extends Application {
                 throw new RuntimeException(e);
             }
 
-            scene.getStylesheets().clear();
-
-            if (Universal.isDarkMode) {
-                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
-            } else {
-                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-light.css")).toExternalForm());
-            }
+            updateThemes(scene, Settings.scene);
         });
     }
 
@@ -347,6 +351,11 @@ public class UFI extends Application {
         });
     }
 
+    private static void updateReloadButton() {
+        reload.setVisible(Universal.isCacheEnabled());
+        reload.setManaged(Universal.isCacheEnabled());
+    }
+
     protected static void checkSettings() throws IOException {
         System.out.println("Г Checking settings...");
 
@@ -484,6 +493,8 @@ public class UFI extends Application {
                     Universal.customTimings, Universal.isDarkMode
             ));
         }
+
+        updateReloadButton();
     }
 
     protected static void updateCacheFile() throws IOException {
@@ -528,4 +539,15 @@ public class UFI extends Application {
         }
     }
 
+    protected void updateThemes(Scene... scenes) {
+        for (Scene scene : scenes) {
+            scene.getStylesheets().clear();
+
+            if (Universal.isDarkMode) {
+                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
+            } else {
+                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-light.css")).toExternalForm());
+            }
+        }
+    }
 }

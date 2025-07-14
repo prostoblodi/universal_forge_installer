@@ -74,6 +74,7 @@ class Settings {
     private final Button resetSettingsButton = new Button("Reset settings");
 
     private final Stage stage = new Stage();
+    protected static Scene scene;
 
     public Settings() {
         System.out.println("@ Settings launched!");
@@ -107,13 +108,14 @@ class Settings {
 
         windowLayout.getStyleClass().add("settings-vbox");
 
-        Scene scene = new Scene(windowLayout);
+        scene = new Scene(windowLayout);
 
         if (Universal.isDarkMode) {
             scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
         } else {
             scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-light.css")).toExternalForm());
         }
+
         stage.setTitle("Settings");
         stage.setScene(scene);
     }
