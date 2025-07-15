@@ -12,6 +12,10 @@ class Updater {
         Instant now = Instant.now();
         long elapsed = now.toEpochMilli() - lastRun.toEpochMilli();
         if (elapsed >= updatePeriodMillis) {
+            Universal.minecraftVersions.clear();
+            Universal.minecraftToForgeVersions.clear();
+            Universal.minecraftToSpecifiedForgeVersions.clear();
+
             try {
                 UFI.showMinecraftVersions(true);
             } catch (IOException e){

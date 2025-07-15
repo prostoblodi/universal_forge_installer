@@ -179,6 +179,10 @@ public class UFI extends Application {
         settingsButton.setOnAction((_) -> new Settings().show());
 
         reload.setOnAction((_) -> new Thread(() -> {
+                Universal.minecraftVersions.clear();
+                Universal.minecraftToForgeVersions.clear();
+                Universal.minecraftToSpecifiedForgeVersions.clear();
+
                 try {
                     showMinecraftVersions(true);
                     Platform.runLater(() -> updateStatusLabel((byte) 0));
@@ -541,6 +545,10 @@ public class UFI extends Application {
 
     protected void updateThemes(Scene... scenes) {
         for (Scene scene : scenes) {
+            if (scene == null){
+                continue;
+            }
+
             scene.getStylesheets().clear();
 
             if (Universal.isDarkMode) {

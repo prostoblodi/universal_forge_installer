@@ -120,7 +120,7 @@ class Settings {
         stage.setScene(scene);
     }
 
-    private HBox createCustomTimingsChoose(Label label, Label label2){
+    private HBox createCustomTimingsChoose(Label label, Label label2) {
         label.getStyleClass().add("settings-label");
         label.setAlignment(Pos.CENTER_LEFT);
         label2.setAlignment(Pos.CENTER_RIGHT);
@@ -146,7 +146,7 @@ class Settings {
         return fullBox;
     }
 
-    private HBox createFolderChooseHBox(){
+    private HBox createFolderChooseHBox() {
         Button minecraftFolderButton = new Button("...");
 
         minecraftFolderButton.setOnAction((_) -> {
@@ -170,14 +170,14 @@ class Settings {
         return folderFullBox;
     }
 
-    private HBox ButtonHBoxGenerator(Button button){
+    private HBox ButtonHBoxGenerator(Button button) {
         button.getStyleClass().add("button");
         HBox hbox = new HBox(button);
         hbox.setAlignment(Pos.CENTER);
         return hbox;
     }
 
-    private <T> HBox ComboHBoxGenerator(Label label, ComboBox<T> comboBox){
+    private <T> HBox ComboHBoxGenerator(Label label, ComboBox<T> comboBox) {
         label.getStyleClass().add("settings-label");
         comboBox.getStyleClass().add("combo-box");
 
@@ -188,7 +188,7 @@ class Settings {
         return fullBox;
     }
 
-    private <T> void initializeComboBox(ComboBox<Pair<String, T>> comboBox, List<Pair<String, T>> comboBoxPairs){
+    private <T> void initializeComboBox(ComboBox<Pair<String, T>> comboBox, List<Pair<String, T>> comboBoxPairs) {
         comboBox.getItems().addAll(comboBoxPairs);
 
         comboBox.setCellFactory(_ -> new ListCell<>() {
@@ -216,7 +216,7 @@ class Settings {
         });
     }
 
-    private <K, T> Pair<String, T> getValue(List<Pair<String, T>> list, K setting){
+    private <K, T> Pair<String, T> getValue(List<Pair<String, T>> list, K setting) {
         return list.stream().filter(pair -> pair.getValue().equals(setting)).findFirst().orElse(new Pair<>("Unknown", null));
     }
 
@@ -224,7 +224,7 @@ class Settings {
         stage.show();
     }
 
-    private void setActions () {
+    private void setActions() {
         defaultMinecraftVersionChoose.setOnAction((_) -> {
             Universal.defaultMinecraftVersion = defaultMinecraftVersionChoose.getValue().getValue();
             System.out.println("@ Default minecraft version changed to: " + Universal.defaultMinecraftVersion);
