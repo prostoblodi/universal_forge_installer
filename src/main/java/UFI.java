@@ -304,7 +304,11 @@ public class UFI extends Application {
 
     private static List<String> getMinecraftVersions() throws IOException {
         updateStatusLabel((byte) 3);
-        return Installer.getMinecraftVersionsForForge();
+
+        List<String> versions = Installer.getMinecraftVersionsForForge();
+        Platform.runLater(() -> updateStatusLabel((byte) 0));
+
+        return versions;
     }
 
     private static List<Pair<String, Byte>> getForgeVersions() throws IOException {
@@ -558,4 +562,5 @@ public class UFI extends Application {
             }
         }
     }
+
 }

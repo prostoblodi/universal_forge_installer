@@ -1,6 +1,7 @@
 import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -56,7 +57,8 @@ class Settings {
             new Pair<>("millenniums", (byte) 6)
     );
 
-    HBox customTimingsHBox;
+    private final HBox customTimingsHBox;
+    private final HBox enableTimings;
 
     private final ComboBox<Pair<String, Byte>> defaultMinecraftVersionChoose = new ComboBox<>();
     private final ComboBox<Pair<String, Byte>> chooseDefaultForgeVersion = new ComboBox<>();
@@ -83,17 +85,36 @@ class Settings {
         setActions();
 
         HBox defaultMinecraftVersionFullBox = ComboHBoxGenerator( new Label("Default minecraft version:"), defaultMinecraftVersionChoose);
+        setToolTip(defaultMinecraftVersionFullBox, "The version of minecraft that is set when you start the application");
+
         HBox defaultForgeVersionFullBox = ComboHBoxGenerator(new Label("Default forge version:"), chooseDefaultForgeVersion);
+        setToolTip(defaultForgeVersionFullBox, "The version of forge that is set when you start the application");
+
         HBox enableMinecraftFileCachingFullBox = ComboHBoxGenerator(new Label("Cache minecraft versions into file:"), enableMinecraftFileCacheChoose);
+        setToolTip(enableMinecraftFileCachingFullBox, "Enable or disable saving a list of minecraft versions to a file");
+
         HBox enableForgeCachingFullBox = ComboHBoxGenerator(new Label("Cache forge versions:"), enableForgeCacheChoose);
+        setToolTip(enableForgeCachingFullBox, "Enable or disable saving forge versions to a RAM");
+
         HBox enableForgeCachingFileFullBox = ComboHBoxGenerator(new Label("Cache forge versions to file:"), enableForgeFileCacheChoose);
-        HBox enableTimings = ComboHBoxGenerator(new Label("Enable versions list auto-update: "), timingsChoose); // Утфиду фгещ-гзвфеу ща мукышщты дшые...
+        setToolTip(enableForgeCachingFileFullBox, "Enable or disable saving forge versions to a file");
+
+        enableTimings = ComboHBoxGenerator(new Label("Enable versions list auto-update: "), timingsChoose); // Утфиду фгещ-гзвфеу ща мукышщты дшые...
+        setToolTip(enableTimings, "Frequency of minecraft and forge version list updates");
+
         HBox customForgeLaunchFullBox = ComboHBoxGenerator(new Label("Enable custom forge launch:"), enableCustomLaunch);
+        setToolTip(customForgeLaunchFullBox, "Enable or disable headless forge installation");
+
         HBox folderFullBox = createFolderChooseHBox();
+        setToolTip(folderFullBox, "Location of minecraft folder(By default in linux: ~/.minecraft, in windows %APPDATA%\\.minecraft)");
+
         customTimingsHBox = createCustomTimingsChoose(new Label("Update frequency:"), new Label("every"));
 
         customTimingsHBox.setVisible(Universal.baseTimings == 8);
         customTimingsHBox.setManaged(Universal.baseTimings == 8);
+
+        enableTimings.setVisible(Universal.isCacheEnabled());
+        enableTimings.setManaged(Universal.isCacheEnabled());
 
         Label mainLabel = new Label("Settings");
         mainLabel.getStyleClass().add("label-main");
@@ -253,6 +274,9 @@ class Settings {
             Universal.enableMinecraftFileCaching = enableMinecraftFileCacheChoose.getValue().getValue();
             System.out.println("@ Minecraft versions file cache is now: " + Universal.enableMinecraftFileCaching);
 
+            enableTimings.setVisible(Universal.isCacheEnabled());
+            enableTimings.setManaged(Universal.isCacheEnabled());
+
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
@@ -265,6 +289,9 @@ class Settings {
             Universal.enableForgeCaching = enableForgeCacheChoose.getValue().getValue();
             System.out.println("@ Forge versions cache is now: " + Universal.enableForgeCaching);
 
+            enableTimings.setVisible(Universal.isCacheEnabled());
+            enableTimings.setManaged(Universal.isCacheEnabled());
+
             try {
                 UFI.updateSettingsFile();
             } catch (IOException e) {
@@ -276,6 +303,9 @@ class Settings {
         enableForgeFileCacheChoose.setOnAction((_) -> {
             Universal.enableForgeFileCaching = enableForgeFileCacheChoose.getValue().getValue();
             System.out.println("@ Forge versions cache to file is now: " + Universal.enableForgeFileCaching);
+
+            enableTimings.setVisible(Universal.isCacheEnabled());
+            enableTimings.setManaged(Universal.isCacheEnabled());
 
             try {
                 UFI.updateSettingsFile();
@@ -438,6 +468,12 @@ class Settings {
         initializeComboBox(customTimingsChoose, customTimings);
     }
 
+    private void setToolTip(Node node, String text){
+        Tooltip tooltip = new Tooltip();
+        tooltip.setText(text);
+        Tooltip.install(node, tooltip);
+    }
+
     private HBox createSeparator(String text) {
         Label label = new Label(text);
 
@@ -453,4 +489,5 @@ class Settings {
 
         return hbox;
     }
+
 }
