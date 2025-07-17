@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -366,6 +367,8 @@ public class UFI extends Application {
         if (!Universal.settingsFile.exists()) {
             System.out.println("| Settings file do not exists at " + Universal.settingsPath);
 
+            Files.createFile(Path.of(Universal.settingsPath));
+
             Universal.defaultMinecraftVersion = 0;
             Universal.defaultForgeVersion = 0;
             Universal.customForgeLaunch = true;
@@ -450,6 +453,7 @@ public class UFI extends Application {
 
         if (!Universal.cacheFile.exists()){
             System.out.println("| Cache file do not exists at " + Universal.cachePath);
+            Files.createFile(Path.of(Universal.cachePath));
             updateCacheFile();
         } else {
             System.out.println("| Cache file already exists at " + Universal.cachePath);
@@ -487,6 +491,10 @@ public class UFI extends Application {
     }
 
     protected static void updateSettingsFile() throws IOException {
+        if(!Universal.settingsFile.exists()){
+            System.out.println(Universal.settingsFile.createNewFile());
+        }
+
         try (FileWriter writer = new FileWriter(Universal.settingsFile)) {
             writer.write(String.format(
                     "defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersionByte=%d%n" +
