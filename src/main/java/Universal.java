@@ -1,3 +1,10 @@
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.util.Pair;
 
 import java.io.File;
@@ -60,4 +67,87 @@ public class Universal {
             return (byte) 0;
         }
     }
+
+    protected static <T> HBox ComboHBoxGenerator(Label label, ComboBox<T> comboBox) {
+        label.getStyleClass().add("settings-label");
+        comboBox.getStyleClass().add("combo-box");
+
+        HBox fullBox = new HBox(label, new Region(), comboBox);
+        HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
+
+        return fullBox;
+    }
+
+    /**
+     * Initializes a ComboBox with key-value pairs.
+     * Only the key is displayed to the user,
+     * while the value remains hidden but can be accessed in code.
+     *
+     * @param comboBox the combo box to initialize
+     * @param comboBoxPairs list of key-value pairs to populate the combo box
+     */
+    protected static <T> void initializeComboBox(ComboBox<Pair<String, T>> comboBox, List<Pair<String, T>> comboBoxPairs) {
+        comboBox.getItems().addAll(comboBoxPairs);
+
+        comboBox.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, T> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
+                }
+            }
+        });
+
+        comboBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<String, T> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getKey());
+                }
+            }
+        });
+    }
+
+    /**
+     * Find a setting that matches the settings specified in the list
+     * @param list list of available settings
+     * @param setting setting from this list
+     * @return
+     * <ul>
+     *     <li><code>if element found:</code>a pair with the needed setting</li>
+     *     <li><code>if element not found:</code>a pair with "Unknown", null</li>
+     * </ul>
+     */
+    protected static <K, T> Pair<String, T> getValue(List<Pair<String, T>> list, K setting) {
+        return list.stream().filter(pair -> pair.getValue().equals(setting)).findFirst().orElse(new Pair<>("Unknown", null));
+    }
+
+    protected static HBox createSeparator(String text) {
+        Label label = new Label(text);
+
+        Separator leftSeparator = new Separator(Orientation.HORIZONTAL);
+        Separator rightSeparator = new Separator(Orientation.HORIZONTAL);
+
+        HBox.setHgrow(leftSeparator, Priority.SOMETIMES);
+        HBox.setHgrow(rightSeparator, Priority.SOMETIMES);
+
+        HBox hbox = new HBox(leftSeparator, label, rightSeparator);
+        hbox.setAlignment(Pos.CENTER);
+        hbox.setSpacing(10);
+
+        return hbox;
+    }
+
+    protected static void setToolTip(Node node, String text){
+        Tooltip tooltip = new Tooltip();
+        tooltip.setText(text);
+        Tooltip.install(node, tooltip);
+    }
+
 }

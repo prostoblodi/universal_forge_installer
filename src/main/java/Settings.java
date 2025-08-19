@@ -1,7 +1,5 @@
 import javafx.event.Event;
 import javafx.geometry.Pos;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -72,6 +70,7 @@ class Settings {
     private final TextField minecraftFolderField = new TextField();
     private final TextField timingsField = new TextField();
 
+    private final Button customizerButton = new Button("Open customizer");
     private final Button resetCacheButton = new Button("Reset cache");
     private final Button resetSettingsButton = new Button("Reset settings");
 
@@ -84,29 +83,29 @@ class Settings {
         initialize();
         setActions();
 
-        HBox defaultMinecraftVersionFullBox = ComboHBoxGenerator( new Label("Default minecraft version:"), defaultMinecraftVersionChoose);
-        setToolTip(defaultMinecraftVersionFullBox, "The version of minecraft that is set when you start the application");
+        HBox defaultMinecraftVersionFullBox = Universal.ComboHBoxGenerator(new Label("Default minecraft version:"), defaultMinecraftVersionChoose);
+        Universal.setToolTip(defaultMinecraftVersionFullBox, "The version of minecraft that is set when you start the application");
 
-        HBox defaultForgeVersionFullBox = ComboHBoxGenerator(new Label("Default forge version:"), chooseDefaultForgeVersion);
-        setToolTip(defaultForgeVersionFullBox, "The version of forge that is set when you start the application");
+        HBox defaultForgeVersionFullBox = Universal.ComboHBoxGenerator(new Label("Default forge version:"), chooseDefaultForgeVersion);
+        Universal.setToolTip(defaultForgeVersionFullBox, "The version of forge that is set when you start the application");
 
-        HBox enableMinecraftFileCachingFullBox = ComboHBoxGenerator(new Label("Cache minecraft versions into file:"), enableMinecraftFileCacheChoose);
-        setToolTip(enableMinecraftFileCachingFullBox, "Enable or disable saving a list of minecraft versions to a file");
+        HBox enableMinecraftFileCachingFullBox = Universal.ComboHBoxGenerator(new Label("Cache minecraft versions into file:"), enableMinecraftFileCacheChoose);
+        Universal.setToolTip(enableMinecraftFileCachingFullBox, "Enable or disable saving a list of minecraft versions to a file");
 
-        HBox enableForgeCachingFullBox = ComboHBoxGenerator(new Label("Cache forge versions:"), enableForgeCacheChoose);
-        setToolTip(enableForgeCachingFullBox, "Enable or disable saving forge versions to a RAM");
+        HBox enableForgeCachingFullBox = Universal.ComboHBoxGenerator(new Label("Cache forge versions:"), enableForgeCacheChoose);
+        Universal.setToolTip(enableForgeCachingFullBox, "Enable or disable saving forge versions to a RAM");
 
-        HBox enableForgeCachingFileFullBox = ComboHBoxGenerator(new Label("Cache forge versions to file:"), enableForgeFileCacheChoose);
-        setToolTip(enableForgeCachingFileFullBox, "Enable or disable saving forge versions to a file");
+        HBox enableForgeCachingFileFullBox = Universal.ComboHBoxGenerator(new Label("Cache forge versions to file:"), enableForgeFileCacheChoose);
+        Universal.setToolTip(enableForgeCachingFileFullBox, "Enable or disable saving forge versions to a file");
 
-        enableTimings = ComboHBoxGenerator(new Label("Enable versions list auto-update: "), timingsChoose); // Утфиду фгещ-гзвфеу ща мукышщты дшые...
-        setToolTip(enableTimings, "Frequency of minecraft and forge version list updates");
+        enableTimings = Universal.ComboHBoxGenerator(new Label("Enable versions list auto-update: "), timingsChoose); // Утфиду фгещ-гзвфеу ща мукышщты дшые...
+        Universal.setToolTip(enableTimings, "Frequency of minecraft and forge version list updates");
 
-        HBox customForgeLaunchFullBox = ComboHBoxGenerator(new Label("Enable custom forge launch:"), enableCustomLaunch);
-        setToolTip(customForgeLaunchFullBox, "Enable or disable headless forge installation");
+        HBox customForgeLaunchFullBox = Universal.ComboHBoxGenerator(new Label("Enable custom forge launch:"), enableCustomLaunch);
+        Universal.setToolTip(customForgeLaunchFullBox, "Enable or disable headless forge installation");
 
         HBox folderFullBox = createFolderChooseHBox();
-        setToolTip(folderFullBox, "Location of minecraft folder(By default in linux: ~/.minecraft, in windows %APPDATA%\\.minecraft)");
+        Universal.setToolTip(folderFullBox, "Location of minecraft folder(By default in linux: ~/.minecraft, in windows %APPDATA%\\.minecraft)");
 
         customTimingsHBox = createCustomTimingsChoose(new Label("Update frequency:"), new Label("every"));
 
@@ -121,10 +120,11 @@ class Settings {
 
         VBox windowLayout = new VBox(
                 mainLabel, defaultMinecraftVersionFullBox, defaultForgeVersionFullBox,
-                createSeparator("Caching"), enableMinecraftFileCachingFullBox, enableForgeCachingFullBox, enableForgeCachingFileFullBox,
+                Universal.createSeparator("Caching"), enableMinecraftFileCachingFullBox, enableForgeCachingFullBox, enableForgeCachingFileFullBox,
                 enableTimings, customTimingsHBox,
-                createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox,
-                createSeparator("Reset"), ButtonHBoxGenerator(resetCacheButton), ButtonHBoxGenerator(resetSettingsButton)
+                Universal.createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox,
+                Universal.createSeparator("Customize"), ButtonHBoxGenerator(customizerButton),
+                Universal.createSeparator("Reset"), ButtonHBoxGenerator(resetCacheButton), ButtonHBoxGenerator(resetSettingsButton)
         );
 
         windowLayout.getStyleClass().add("settings-vbox");
@@ -143,8 +143,6 @@ class Settings {
 
     private HBox createCustomTimingsChoose(Label label, Label label2) {
         label.getStyleClass().add("settings-label");
-        label.setAlignment(Pos.CENTER_LEFT);
-        label2.setAlignment(Pos.CENTER_RIGHT);
 
         customTimingsChoose.getStyleClass().add("combo-box");
         timingsField.setPrefWidth(50);
@@ -161,7 +159,6 @@ class Settings {
 
         HBox fullBox = new HBox(label, new Region(), label2, timingsField, customTimingsChoose);
         HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
-        fullBox.setAlignment(Pos.CENTER);
         fullBox.setSpacing(10);
 
         return fullBox;
@@ -177,16 +174,13 @@ class Settings {
         });
 
         HBox folderChoose = new HBox(minecraftFolderField, minecraftFolderButton);
-        folderChoose.setAlignment(Pos.CENTER);
         folderChoose.setSpacing(10);
 
         VBox folderLabel = new VBox(new Label("Choose minecraft folder: "));
-        folderLabel.setAlignment(Pos.CENTER);
         folderLabel.getStyleClass().add("settings-label");
 
         HBox folderFullBox = new HBox(folderLabel, new Region(), folderChoose);
         HBox.setHgrow(folderFullBox.getChildren().get(1), Priority.ALWAYS);
-        folderFullBox.setAlignment(Pos.CENTER);
 
         return folderFullBox;
     }
@@ -196,49 +190,6 @@ class Settings {
         HBox hbox = new HBox(button);
         hbox.setAlignment(Pos.CENTER);
         return hbox;
-    }
-
-    private <T> HBox ComboHBoxGenerator(Label label, ComboBox<T> comboBox) {
-        label.getStyleClass().add("settings-label");
-        comboBox.getStyleClass().add("combo-box");
-
-        HBox fullBox = new HBox(label, new Region(), comboBox);
-        HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
-        fullBox.setAlignment(Pos.CENTER);
-
-        return fullBox;
-    }
-
-    private <T> void initializeComboBox(ComboBox<Pair<String, T>> comboBox, List<Pair<String, T>> comboBoxPairs) {
-        comboBox.getItems().addAll(comboBoxPairs);
-
-        comboBox.setCellFactory(_ -> new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, T> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-
-        comboBox.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(Pair<String, T> item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item == null || empty) {
-                    setText(null);
-                } else {
-                    setText(item.getKey());
-                }
-            }
-        });
-    }
-
-    private <K, T> Pair<String, T> getValue(List<Pair<String, T>> list, K setting) {
-        return list.stream().filter(pair -> pair.getValue().equals(setting)).findFirst().orElse(new Pair<>("Unknown", null));
     }
 
     protected void show() {
@@ -389,6 +340,8 @@ class Settings {
             }
         });
 
+        customizerButton.setOnAction((_) -> new Customizer().show());
+        
         resetCacheButton.setOnAction((_) -> {
             if (Universal.cacheFile.delete()) {
                 System.out.println("@ Cache file at " + Universal.cachePath + " deleted(cache reset successfully)");
@@ -437,16 +390,16 @@ class Settings {
         minecraftFolderField.setText(Universal.minecraftFolder);
         timingsField.setText(String.valueOf(Universal.customTimings.getKey()));
 
-        chooseDefaultForgeVersion.setValue(getValue(defaultForgeVersions, Universal.defaultForgeVersion));
-        defaultMinecraftVersionChoose.setValue(getValue(defaultMinecraftVersions, Universal.defaultMinecraftVersion));
+        chooseDefaultForgeVersion.setValue(Universal.getValue(defaultForgeVersions, Universal.defaultForgeVersion));
+        defaultMinecraftVersionChoose.setValue(Universal.getValue(defaultMinecraftVersions, Universal.defaultMinecraftVersion));
 
-        enableMinecraftFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableMinecraftFileCaching));
-        enableForgeCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeCaching));
-        enableForgeFileCacheChoose.setValue(getValue(enableOrDisable, Universal.enableForgeFileCaching));
-        timingsChoose.setValue(getValue(timings, Universal.baseTimings));
-        customTimingsChoose.setValue(getValue(customTimings, Universal.customTimings.getValue()));
+        enableMinecraftFileCacheChoose.setValue(Universal.getValue(enableOrDisable, Universal.enableMinecraftFileCaching));
+        enableForgeCacheChoose.setValue(Universal.getValue(enableOrDisable, Universal.enableForgeCaching));
+        enableForgeFileCacheChoose.setValue(Universal.getValue(enableOrDisable, Universal.enableForgeFileCaching));
+        timingsChoose.setValue(Universal.getValue(timings, Universal.baseTimings));
+        customTimingsChoose.setValue(Universal.getValue(customTimings, Universal.customTimings.getValue()));
 
-        enableCustomLaunch.setValue(getValue(enableOrDisable, Universal.customForgeLaunch));
+        enableCustomLaunch.setValue(Universal.getValue(enableOrDisable, Universal.customForgeLaunch));
     }
 
     private void initialize() {
@@ -458,36 +411,13 @@ class Settings {
 
         minecraftFolderField.setOnContextMenuRequested(Event::consume);
 
-        initializeComboBox(chooseDefaultForgeVersion, defaultForgeVersions);
-        initializeComboBox(defaultMinecraftVersionChoose, defaultMinecraftVersions);
-        initializeComboBox(enableMinecraftFileCacheChoose, enableOrDisable);
-        initializeComboBox(enableForgeCacheChoose, enableOrDisable);
-        initializeComboBox(enableForgeFileCacheChoose, enableOrDisable);
-        initializeComboBox(enableCustomLaunch, enableOrDisable);
-        initializeComboBox(timingsChoose, timings);
-        initializeComboBox(customTimingsChoose, customTimings);
+        Universal.initializeComboBox(chooseDefaultForgeVersion, defaultForgeVersions);
+        Universal.initializeComboBox(defaultMinecraftVersionChoose, defaultMinecraftVersions);
+        Universal.initializeComboBox(enableMinecraftFileCacheChoose, enableOrDisable);
+        Universal.initializeComboBox(enableForgeCacheChoose, enableOrDisable);
+        Universal.initializeComboBox(enableForgeFileCacheChoose, enableOrDisable);
+        Universal.initializeComboBox(enableCustomLaunch, enableOrDisable);
+        Universal.initializeComboBox(timingsChoose, timings);
+        Universal.initializeComboBox(customTimingsChoose, customTimings);
     }
-
-    private void setToolTip(Node node, String text){
-        Tooltip tooltip = new Tooltip();
-        tooltip.setText(text);
-        Tooltip.install(node, tooltip);
-    }
-
-    private HBox createSeparator(String text) {
-        Label label = new Label(text);
-
-        Separator leftSeparator = new Separator(Orientation.HORIZONTAL);
-        Separator rightSeparator = new Separator(Orientation.HORIZONTAL);
-
-        HBox.setHgrow(leftSeparator, Priority.SOMETIMES);
-        HBox.setHgrow(rightSeparator, Priority.SOMETIMES);
-
-        HBox hbox = new HBox(leftSeparator, label, rightSeparator);
-        hbox.setAlignment(Pos.CENTER);
-        hbox.setSpacing(10);
-
-        return hbox;
-    }
-
 }
