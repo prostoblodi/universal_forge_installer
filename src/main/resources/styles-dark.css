@@ -164,3 +164,38 @@
     -fx-background-color: #4a4a4a; /* Arrow colour */
 }
 
+/* Customizer scroll pane style */
+.scroll-pane {
+        -fx-background-color: #242424; /* scroll pane background colour */
+}
+
+/* Scroll bar style */
+.scroll-pane .scroll-bar:vertical{
+     -fx-background-color: #383838; /* Scroll bar colour */
+     -fx-background-radius: 5px; /* Rounding radius of the scroll bar */
+}
+
+/* Scroll bar thumb style */
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #4a4a4a; /* Thumb colour */
+    -fx-background-radius: 5px; /* Rounding radius of the thumb */
+}
+
+/* The style of the arena that thumb is rolling around in */
+.scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: #383838; /* Area colour */
+    -fx-background-radius: 5px; /* Rounding radius of the area */
+}
+
+/* The style of buttons with arrows */
+.scroll-pane .scroll-bar:vertical .increment-button,
+.scroll-pane .scroll-bar:vertical .decrement-button {
+    -fx-background-color: #383838; /* Button colour */
+}
+
+/* The style of arrows in buttons */
+.scroll-pane .scroll-bar:vertical .increment-arrow,
+.scroll-pane .scroll-bar:vertical .decrement-arrow {
+    -fx-background-color: #4a4a4a; /* Arrow colour */
+}
+

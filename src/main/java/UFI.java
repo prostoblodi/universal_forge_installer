@@ -431,6 +431,9 @@ public class UFI extends Application {
                 } else if (line.contains("isDarkMode")) {
                     data = line.split("=");
                     Universal.isDarkMode = Boolean.parseBoolean(data[1]);
+                } else if (line.contains("extendCustomizer")){
+                    data = line.split("=");
+                    Universal.extendCustomizer = Boolean.parseBoolean(data[1]);
                 }
             }
         }
@@ -503,10 +506,10 @@ public class UFI extends Application {
             writer.write(String.format(
                     "defaultForgeVersionByte=%d%ncustomForgeLaunch=%b%nminecraftFolder=%s%ndefaultMinecraftVersionByte=%d%n" +
                     "enableForgeCaching=%b%nenableForgeFileCaching=%b%nenableMinecraftFileCaching=%b%nbaseTimings=%d%ncustomTimings=%s%n" +
-                    "isDarkMode=%b",
+                    "isDarkMode=%b%nextendCustomizer=%b",
                     Universal.defaultForgeVersion, Universal.customForgeLaunch, Universal.minecraftFolder, Universal.defaultMinecraftVersion,
                     Universal.enableForgeCaching, Universal.enableForgeFileCaching, Universal.enableMinecraftFileCaching, Universal.baseTimings,
-                    Universal.customTimings, Universal.isDarkMode
+                    Universal.customTimings, Universal.isDarkMode, Universal.extendCustomizer
             ));
         }
 

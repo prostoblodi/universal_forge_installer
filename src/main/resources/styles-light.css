@@ -162,3 +162,38 @@
 .combo-box-popup .scroll-bar:vertical .decrement-arrow {
     -fx-background-color: #babdb6; /* Arrow colour */
 }
+
+/* Customizer scroll pane style */
+.scroll-pane {
+    -fx-background-color: #f5f5f5; /* scroll pane background colour */
+}
+
+/* Scroll bar style */
+.scroll-pane .scroll-bar:vertical{
+     -fx-background-color: #d3d7cf; /* Scroll bar colour */
+     -fx-background-radius: 5px; /* Rounding radius */
+}
+
+/* Scroll bar thumb style */
+.scroll-pane .scroll-bar:vertical .thumb {
+    -fx-background-color: #babdb6; /* Thumb colour */
+    -fx-background-radius: 5px; /* Rounding radius of the thumb */
+}
+
+/* The style of the track area that thumb moves around in */
+.scroll-pane .scroll-bar:vertical .track {
+    -fx-background-color: #d3d7cf; /* Area colour */
+    -fx-background-radius: 5px; /* Rounding radius of the area */
+}
+
+/* Buttons with arrows */
+.scroll-pane .scroll-bar:vertical .increment-button,
+.scroll-pane .scroll-bar:vertical .decrement-button {
+    -fx-background-color: #d3d7cf; /* Button colour */
+}
+
+/* Arrows in buttons */
+.scroll-pane .scroll-bar:vertical .increment-arrow,
+.scroll-pane .scroll-bar:vertical .decrement-arrow {
+    -fx-background-color: #babdb6; /* Arrow colour */
+}

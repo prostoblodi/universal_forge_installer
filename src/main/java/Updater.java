@@ -20,7 +20,6 @@ class Updater {
                 UFI.showMinecraftVersions(true);
             } catch (IOException e){
                 UFI.updateStatusLabel((byte) 5);
-                throw new RuntimeException(e);
             }
 
             lastRun = now;

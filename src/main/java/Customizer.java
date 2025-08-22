@@ -1,26 +1,19 @@
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
 class Customizer {
-
-    private final List<Pair<String, Byte>> colorFormats = List.of(
-            new Pair<>("hex", (byte) 0),
-            new Pair<>("rgba", (byte) 1)
-    );
 
     private final List<Pair<String, Byte>> presets = List.of(
             new Pair<>("dark", (byte) 0),
@@ -35,29 +28,21 @@ class Customizer {
     public Customizer(){
         System.out.println("# Customizer launched!");
 
-        Label presetLabel = new Label("Preset:");
-        presetLabel.getStyleClass().add("settings-label");
-        presetChooser.getStyleClass().add("combo-box");
+        VBox windowLayout = new VBox();
 
-        HBox presetHBox = new HBox(presetLabel, presetChooser);
-        presetHBox.setAlignment(Pos.CENTER);
-        presetHBox.setSpacing(10);
-
-        Label mainLabel = new Label("Customizer");
-        mainLabel.getStyleClass().add("label-main");
-
-        VBox windowLayout = new VBox(mainLabel, presetHBox, Universal.createSeparator("Buttons"));
-        windowLayout.getChildren().addAll(buttonCustomize());
-
-        windowLayout.getChildren().add(Universal.createSeparator("Choosers"));
-        windowLayout.getChildren().addAll(choosersCustomize());
-
-        windowLayout.getChildren().add(Universal.createSeparator("Text"));
-        windowLayout.getChildren().addAll(textCustomize());
+        if (Universal.extendCustomizer){
+            extend(windowLayout);
+        } else {
+            reduce(windowLayout);
+        }
 
         windowLayout.getStyleClass().add("settings-vbox");
 
-        scene = new Scene(windowLayout);
+        ScrollPane scrollPane = new ScrollPane(windowLayout);
+        scrollPane.setFitToWidth(true);
+        scrollPane.getStyleClass().add("scroll-pane");
+
+        scene = new Scene(scrollPane);
 
         if (Universal.isDarkMode) {
             scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
@@ -69,120 +54,122 @@ class Customizer {
         stage.setScene(scene);
     }
 
-    private List<HBox> buttonCustomize(){
-        final TextField changeRoundingRadiusField = new TextField();
-        final TextField changeColorField = new TextField();
-        final ComboBox<Pair<String, Byte>> changeColorChooser = new ComboBox<>();
-        final TextField textSizeChanger = new TextField();
-        final TextField changeTextColorField = new TextField();
-        final ComboBox<Pair<String, Byte>> changeTextColorChooser = new ComboBox<>();
-        final TextField changeBackgroundOpacityField = new TextField();
-
-        HBox changeRoundingRadius = changeSizeHBoxGenerator(new Label("Rounding radius: "), changeRoundingRadiusField, new Label("px"),
-        "Set the written rounding radius for button.");
-        HBox changeBGColor = changeColorHBoxGenerator(new Label("Background color: "), changeColorField, changeColorChooser,
-        "Set the written color for the button background."); // ボタン背景の色を設定する
-        HBox changeOpacity = changeOpacityHBoxGenerator(new Label("Button background opacity: "), changeBackgroundOpacityField, new Label("%"),
-        "Set the written opacity percentage for the button background.");
-        HBox changeTextSize = changeSizeHBoxGenerator(new Label("Text size: "), textSizeChanger, new Label("px"),
-        "Set the written size for the button text.");
-        HBox changeTextColor = changeColorHBoxGenerator(new Label("Text color: "), changeTextColorField, changeTextColorChooser,
-        "Set the written color for the button text.");
-
-        return List.of(changeRoundingRadius, changeBGColor, changeOpacity, changeTextSize, changeTextColor);
-    }
-
-    private List<HBox> choosersCustomize(){
-        final TextField changeRoundingRadiusField = new TextField();
-        final TextField changeColorField = new TextField();
-        final ComboBox<Pair<String, Byte>> changeColorChooser = new ComboBox<>();
-        final TextField textSizeChanger = new TextField();
-        final TextField changeTextColorField = new TextField();
-        final ComboBox<Pair<String, Byte>> changeTextColorChooser = new ComboBox<>();
-        final TextField changeBackgroundOpacityField = new TextField();
-
-        HBox changeRoundingRadius = changeSizeHBoxGenerator(new Label("Rounding radius: "), changeRoundingRadiusField, new Label("px"),
-                "Set the written rounding radius for chooser.");
-        HBox changeBGColor = changeColorHBoxGenerator(new Label("Background color: "), changeColorField, changeColorChooser,
-                "Set the written color for the chooser background.");
-        HBox changeOpacity = changeOpacityHBoxGenerator(new Label("Button background opacity: "), changeBackgroundOpacityField, new Label("%"),
-                "Set the written opacity percentage for the chooser background.");
-        HBox changeTextSize = changeSizeHBoxGenerator(new Label("Text size: "), textSizeChanger, new Label("px"),
-                "Set the written size for the chooser text.");
-        HBox changeTextColor = changeColorHBoxGenerator(new Label("Text color: "), changeTextColorField, changeTextColorChooser,
-                "Set the written color for the chooser text.");
-
-        return List.of(changeRoundingRadius, changeBGColor, changeOpacity, changeTextSize, changeTextColor);
-    }
-
-    private List<HBox> textCustomize(){
-        final TextField textSizeChanger = new TextField();
-        final TextField changeTextColorField = new TextField();
-        final ComboBox<Pair<String, Byte>> changeTextColorChooser = new ComboBox<>();
-
-        HBox changeTextSize = changeSizeHBoxGenerator(new Label("Text size: "), textSizeChanger, new Label("px"),
-                "Set the written size for the chooser text.");
-        HBox changeTextColor = changeColorHBoxGenerator(new Label("Text color: "), changeTextColorField, changeTextColorChooser,
-                "Set the written color for the chooser text.");
-
-        return List.of(changeTextSize, changeTextColor);
-    }
-
     protected void show(){
         stage.show();
     }
 
-    private HBox changeColorHBoxGenerator(Label label, TextField textField, ComboBox<Pair<String, Byte>> comboBox, String tooltip){
-        HBox colorChoose = new HBox(textField, comboBox);
-        colorChoose.setSpacing(10);
+    private void reduce(VBox windowLayout){
+        windowLayout.getChildren().clear();
 
-        label.getStyleClass().add("settings-label");
+        Label presetLabel = new Label("Preset:");
+        presetLabel.getStyleClass().add("settings-label");
+        presetChooser.getStyleClass().add("combo-box");
+        Universal.initializeComboBox(presetChooser, presets);
 
-        HBox fullBox = new HBox(label, new Region(), colorChoose);
-        HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
+        HBox presetHBox = new HBox(presetLabel, presetChooser);
+        presetHBox.setAlignment(Pos.CENTER);
+        presetHBox.setSpacing(10);
 
-        Universal.setToolTip(fullBox, tooltip);
+        windowLayout.getChildren().add(presetHBox);
 
-        return fullBox;
-    }
+        Label mainLabel = new Label("Customizer");
+        mainLabel.getStyleClass().add("label-main");
 
-    private HBox changeSizeHBoxGenerator(Label label, TextField textField, Label label2, String tooltip){
-        label.getStyleClass().add("settings-label");
-        label2.getStyleClass().add("settings-label");
+        windowLayout.getChildren().add(mainLabel);
 
-        HBox sizeChoose = new HBox(textField, label2);
-        sizeChoose.setSpacing(10);
+        CustomizerHBox universalHBox = new CustomizerHBox("chooser, button", true, true, true, true, true);
 
-        HBox fullBox = new HBox(label, new Region(), sizeChoose);
-        HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
+        windowLayout.getChildren().add(Universal.createSeparator("Universal"));
+        windowLayout.getChildren().addAll(universalHBox.getHBoxes());
 
-        Universal.setToolTip(fullBox, tooltip);
+        CustomizerHBox labelsHBox = new CustomizerHBox("label", false, false, false, true, true);
 
-        return fullBox;
-    }
+        windowLayout.getChildren().add(Universal.createSeparator("Label"));
+        windowLayout.getChildren().addAll(labelsHBox.getHBoxes());
 
-    private HBox changeOpacityHBoxGenerator(Label label, TextField textField, Label label2, String tooltip){
-        label.getStyleClass().add("settings-label");
-        label2.getStyleClass().add("settings-label");
+        CustomizerHBox mainLabelHBox = new CustomizerHBox("main", false, false, false, true, true);
 
-        TextFormatter<String> formatter = new TextFormatter<>(change -> {
-            if (Byte.parseByte(change.getControlNewText()) <= 100) {
-                return change;
-            } else {
-                return null;
+        windowLayout.getChildren().add(Universal.createSeparator("Main label"));
+        windowLayout.getChildren().addAll(mainLabelHBox.getHBoxes());
+
+        CustomizerHBox windowHBox = new CustomizerHBox("window", false, true, true, false, false);
+
+        windowLayout.getChildren().add(Universal.createSeparator("Window"));
+        windowLayout.getChildren().addAll(windowHBox.getHBoxes());
+        Button extendButton = new Button("Extend");
+        extendButton.getStyleClass().add("button");
+        extendButton.setAlignment(Pos.CENTER);
+
+        extendButton.setOnAction((_) -> {
+            Universal.extendCustomizer = true;
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
             }
+            extend(windowLayout);
         });
 
-        textField.setTextFormatter(formatter);
+        windowLayout.getChildren().add(extendButton);
+    }
 
-        HBox sizeChoose = new HBox(textField, label2);
-        sizeChoose.setSpacing(10);
+    private void extend(VBox windowLayout){
+        windowLayout.getChildren().clear();
 
-        HBox fullBox = new HBox(label, new Region(), sizeChoose);
-        HBox.setHgrow(fullBox.getChildren().get(1), Priority.ALWAYS);
+        Label presetLabel = new Label("Preset:");
+        presetLabel.getStyleClass().add("settings-label");
+        presetChooser.getStyleClass().add("combo-box");
+        Universal.initializeComboBox(presetChooser, presets);
 
-        Universal.setToolTip(fullBox, tooltip);
+        HBox presetHBox = new HBox(presetLabel, presetChooser);
+        presetHBox.setAlignment(Pos.CENTER);
+        presetHBox.setSpacing(10);
 
-        return fullBox;
+        windowLayout.getChildren().add(presetHBox);
+
+        Label mainLabel = new Label("Customizer");
+        mainLabel.getStyleClass().add("label-main");
+
+        windowLayout.getChildren().add(mainLabel);
+
+        CustomizerHBox buttonHBox = new CustomizerHBox("button", true, true, true, true, true);
+
+        windowLayout.getChildren().add(Universal.createSeparator("Button"));
+        windowLayout.getChildren().addAll(buttonHBox.getHBoxes());
+
+        CustomizerHBox chooserHBox = new CustomizerHBox("chooser", true, true, true, true, true);
+
+        windowLayout.getChildren().add(Universal.createSeparator("Chooser"));
+        windowLayout.getChildren().addAll(chooserHBox.getHBoxes());
+
+        CustomizerHBox mainLabelHBox = new CustomizerHBox("main", false, false, false, true, true);
+
+        windowLayout.getChildren().add(Universal.createSeparator("Main label"));
+        windowLayout.getChildren().addAll(mainLabelHBox.getHBoxes());
+
+        CustomizerHBox labelHBox = new CustomizerHBox("label", false, false, false, true, true);
+
+        windowLayout.getChildren().add(Universal.createSeparator("Label"));
+        windowLayout.getChildren().addAll(labelHBox.getHBoxes());
+
+        CustomizerHBox windowHBox = new CustomizerHBox("window", false, true, true, false, false);
+
+        windowLayout.getChildren().add(Universal.createSeparator("Window"));
+        windowLayout.getChildren().addAll(windowHBox.getHBoxes());
+        Button extendButton = new Button("Reduce");
+        extendButton.getStyleClass().add("button");
+        extendButton.setAlignment(Pos.CENTER);
+
+        extendButton.setOnAction((_) -> {
+            Universal.extendCustomizer = false;
+            try {
+                UFI.updateSettingsFile();
+            } catch (IOException e) {
+                UFI.updateStatusLabel((byte) 5);
+            }
+            reduce(windowLayout);
+        });
+
+        windowLayout.getChildren().add(extendButton);
     }
 }

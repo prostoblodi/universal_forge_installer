@@ -30,6 +30,8 @@ public class Universal {
     protected static String minecraftFolder;
     protected static String lastUsedMinecraftVersion;
 
+    protected static boolean extendCustomizer;
+
     protected static String settingsPath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.settings"));
     protected static String cachePath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.cache"));
 
