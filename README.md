@@ -17,6 +17,21 @@ Instead of double-clicking, you should write to the console:
 
 `java -jar UFIL1.2.jar`(for linux)
 
+## How to build/run it?
+First, you need to:
+
+`cd /cloned/ufi`
+
+Then, if you wanna run it:
+
+`./gradlew run`
+
+if you wanna build it:
+
+`./gradlew shadowJar`
+
+And the result will be at /cloned/ufi/build/libs
+
 # How does it work?
 This application gets version information from the [official Minecraft Forge website](https://files.minecraftforge.net/net/minecraftforge/forge/), then downloads it from the [maven repository Forge](https://maven.minecraftforge.net/net/minecraftforge/forge/)
 
