@@ -83,7 +83,7 @@ abstract class Installer implements Runnable {
         byte howOldIndex = Universal.howOldIndex(minecraftVersion);
 
         if (!forgeJarsDir.toFile().exists()) {
-            Files.createDirectory(forgeJarsDir);
+            forgeJarsDir.toFile().mkdirs();
             System.out.println("The ForgeJars folder is successfully created.");
         }
 
@@ -128,21 +128,20 @@ abstract class Installer implements Runnable {
         String[] command;
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
-        final String reducedPath = filePath.getParent().toString();
-        final String modifiedFileName = String.format("'%s'", fileName);
-
         String args = "";
         if(Universal.customForgeLaunch){args = String.format(" --installClient %s", Universal.minecraftFolder);}
 
         if (isWindows) {
             command = new String[]{
                     "cmd", "/c",
-                    "cd /d " + reducedPath + " && java -jar " + modifiedFileName + args
+                    String.format("cd %s", filePath.getParent().toString()),
+                    String.format("&& java -jar %s %s", filePath, args)
             };
         } else {
             command = new String[]{
                     "bash", "-c",
-                    "cd " + reducedPath + " && java -jar " + modifiedFileName + args
+                    String.format("cd %s", filePath.getParent().toString()),
+                    String.format("&& java -jar %s %s", filePath, args)
             };
         }
 

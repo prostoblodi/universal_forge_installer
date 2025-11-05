@@ -54,8 +54,6 @@ public class UFI extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        checkSettings();
-
         GridPane gp = new GridPane();
         gp.add(minecraftVersionLabel, 0, 1);
         gp.add(chooseMinecraftVersion, 1, 1);
@@ -104,6 +102,11 @@ public class UFI extends Application {
     }
 
     private void initialize(VBox vbox) throws IOException {
+        if (!new File(System.getProperty("user.home"), "UFI").exists()){
+            System.out.println(new File(String.valueOf(Paths.get(System.getProperty("user.home"), "UFI"))).mkdirs());
+        }
+
+        checkSettings();
         setActions();
 
         statusLabel.textProperty().bind(textProperty);
