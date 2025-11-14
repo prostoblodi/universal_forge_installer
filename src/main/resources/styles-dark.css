@@ -167,6 +167,7 @@
 /* Customizer scroll pane style */
 .scroll-pane {
         -fx-background-color: #242424; /* scroll pane background colour */
+        -fx-fit-to-height: true;
 }
 
 /* Scroll bar style */
