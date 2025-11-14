@@ -4,8 +4,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -83,8 +85,9 @@ abstract class Installer implements Runnable {
         byte howOldIndex = Universal.howOldIndex(minecraftVersion);
 
         if (!forgeJarsDir.toFile().exists()) {
-            forgeJarsDir.toFile().mkdirs();
-            System.out.println("The ForgeJars folder is successfully created.");
+            if (forgeJarsDir.toFile().mkdirs()) {
+                System.out.println("The ForgeJars folder is successfully created.");
+            }
         }
 
         forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
@@ -124,7 +127,7 @@ abstract class Installer implements Runnable {
     }
 
     // Run Forge
-    protected static void run_forge() {
+    protected static void run_forge() throws RuntimeException {
         String[] command;
         boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
 
@@ -146,17 +149,26 @@ abstract class Installer implements Runnable {
         }
 
         try {
+            Process process = new ProcessBuilder(command).start();
+
             if (Universal.customForgeLaunch){
-                new ProcessBuilder(command)
-                        .inheritIO()
-                        .start()
-                        .waitFor();
-                System.out.println("Forge installed!");
-            } else {
-                new ProcessBuilder(command)
-                        .inheritIO()
-                        .start();
-                System.out.println("Forge file launched!");
+                process.waitFor();
+
+                String line1;
+                boolean hasError = false;
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+                while ((line1 = reader.readLine()) != null) {
+                    if (line1.contains("error")){
+                        hasError = true;
+                        break;
+                    }
+                }
+
+                if (hasError) {
+                    throw new RuntimeException();
+                }
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);

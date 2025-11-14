@@ -157,28 +157,51 @@ public class UFI extends Application {
 
         downloadButton.setOnAction(
                 (_) -> {
-                    updateStatusLabel((byte) 1);
-                    new Thread(() -> {
-                        try {
-                            Installer.download_forge(minecraftVersion, forgeVersion);
-                            Platform.runLater(() -> {
-                                updateStatusLabel((byte) 2);
-                                if (Universal.howOldIndex(minecraftVersion) >= 1) {
-                                    if (Universal.customForgeLaunch) {updateStatusLabel((byte) 6);}
-                                    else {updateStatusLabel((byte) 8);}
-                                    new Thread(() -> {
-                                        Installer.run_forge();
-                                        Platform.runLater(() -> {if (Universal.customForgeLaunch) {updateStatusLabel((byte) 7);} else{updateStatusLabel((byte) 9);}});
-                                    }).start();
-                                }
-                            });
-                        } catch (IOException | URISyntaxException e) {
-                            UFI.updateStatusLabel((byte) 5);
-                            throw new RuntimeException(e);
-                        }
-                    }).start();
-                }
-        );
+                    if (!minecraftVersion.isEmpty() && !forgeVersion.getKey().isEmpty()) {
+                        updateStatusLabel((byte) 1); // downloading
+                        new Thread(() -> {
+                            try {
+                                Installer.download_forge(minecraftVersion, forgeVersion);
+                            } catch (IOException | URISyntaxException e) {
+                                updateStatusLabel((byte) 5); // error
+                                Thread.currentThread().interrupt();
+                            }
+
+                            if (!Thread.currentThread().isInterrupted()) {
+                                Platform.runLater(() -> {
+                                    updateStatusLabel((byte) 2); // downloaded
+
+                                    if (Universal.howOldIndex(minecraftVersion) >= 1) {
+                                        if (Universal.customForgeLaunch) {
+                                            updateStatusLabel((byte) 6); // installing
+                                        } else {
+                                            updateStatusLabel((byte) 8); // launching
+                                        }
+
+                                        new Thread(() -> {
+                                            try {
+                                                Installer.run_forge();
+                                            } catch (RuntimeException e) {
+                                                updateStatusLabel((byte) 5);
+                                                Thread.currentThread().interrupt();
+                                            }
+
+                                            if (!Thread.currentThread().isInterrupted()) {
+                                                Platform.runLater(() -> {
+                                                    if (Universal.customForgeLaunch) {
+                                                        updateStatusLabel((byte) 7); // installed
+                                                    } else {
+                                                        updateStatusLabel((byte) 9); // launched
+                                                    }
+                                                });
+                                            }
+                                        }).start();
+                                    }
+                                });
+                            }
+                        }).start();
+                    }
+                });
 
         settingsButton.setOnAction((_) -> new Settings().show());
 
