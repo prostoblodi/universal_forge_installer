@@ -92,7 +92,7 @@ class Settings {
         HBox enableMinecraftFileCachingFullBox = Universal.ComboHBoxGenerator(new Label("Cache minecraft versions into file:"), enableMinecraftFileCacheChoose);
         Universal.setToolTip(enableMinecraftFileCachingFullBox, "Enable or disable saving a list of minecraft versions to a file");
 
-        HBox enableForgeCachingFullBox = Universal.ComboHBoxGenerator(new Label("Cache forge versions:"), enableForgeCacheChoose);
+        HBox enableForgeCachingFullBox = Universal.ComboHBoxGenerator(new Label("Cache forge versions in RAM:"), enableForgeCacheChoose);
         Universal.setToolTip(enableForgeCachingFullBox, "Enable or disable saving forge versions to a RAM");
 
         HBox enableForgeCachingFileFullBox = Universal.ComboHBoxGenerator(new Label("Cache forge versions to file:"), enableForgeFileCacheChoose);

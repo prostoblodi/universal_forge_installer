@@ -23,7 +23,7 @@ class Customizer {
     private final ComboBox<Pair<String, Byte>> presetChooser = new ComboBox<>();
 
     private final Stage stage = new Stage();
-    protected Scene scene;
+    protected static Scene scene;
 
     public Customizer(){
         System.out.println("# Customizer launched!");

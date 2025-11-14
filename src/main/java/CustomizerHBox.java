@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class CustomizerHBox {
-    private List<HBox> list = new ArrayList<>();
+    private final List<HBox> list = new ArrayList<>();
 
     private final List<Pair<String, Byte>> colorFormats = List.of(
             new Pair<>("hex", (byte) 0),
@@ -57,8 +57,6 @@ class CustomizerHBox {
     protected List<HBox> getHBoxes(){
         return list;
     }
-
-    protected void setActions(){}
 
     private HBox changeColorHBoxGenerator(Label label, TextField textField, ComboBox<Pair<String, Byte>> comboBox, String tooltip){
         Universal.initializeComboBox(comboBox, colorFormats);
