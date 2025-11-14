@@ -229,7 +229,7 @@ public class UFI extends Application {
                 throw new RuntimeException(e);
             }
 
-            updateThemes(scene, Settings.scene);
+            updateThemes(scene, Settings.scene, Customizer.scene);
         });
     }
 
