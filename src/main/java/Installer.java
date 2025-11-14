@@ -4,10 +4,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -143,8 +141,7 @@ abstract class Installer implements Runnable {
         } else {
             command = new String[]{
                     "bash", "-c",
-                    String.format("cd %s", filePath.getParent().toString()),
-                    String.format("&& java -jar %s %s", filePath, args)
+                    String.format("cd %s && java -jar %s %s", filePath.getParent().toString(), filePath, args)
             };
         }
 
@@ -152,21 +149,7 @@ abstract class Installer implements Runnable {
             Process process = new ProcessBuilder(command).start();
 
             if (Universal.customForgeLaunch){
-                process.waitFor();
-
-                String line1;
-                boolean hasError = false;
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-                while ((line1 = reader.readLine()) != null) {
-                    if (line1.contains("error")){
-                        hasError = true;
-                        break;
-                    }
-                }
-
-                if (hasError) {
+                if (process.waitFor() != 0) {
                     throw new RuntimeException();
                 }
             }
