@@ -48,10 +48,6 @@ public class UFI extends Application {
 
     protected static Scene scene;
 
-    public static void main(String[] args) {
-        launch(args);
-    }
-
     @Override
     public void start(Stage primaryStage) throws IOException {
         GridPane gp = new GridPane();

@@ -21,7 +21,6 @@ import java.util.Objects;
 
 abstract class Installer implements Runnable {
 
-    private static String fileName;
     private static Path filePath;
 
     private static Document forgePageDocument;
@@ -92,6 +91,7 @@ abstract class Installer implements Runnable {
 
         forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
 
+        String fileName;
 
         if (howOldIndex == 2) {
             fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
