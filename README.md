@@ -13,9 +13,9 @@ Instead of double-clicking, you should write to the console:
 
 `cd /ufi/download/directory/`, where /ufi/download/directory is the directory where the downloaded .jar is located
 
-`java -jar UFIW1.2.jar`(for windows)
+`java -jar UFIW1.2.1.jar`(for windows)
 
-`java -jar UFIL1.2.jar`(for linux)
+`java -jar UFIL1.2.1.jar`(for linux)
 
 ## How to build/run it?
 First, you need to:
