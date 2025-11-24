@@ -32,10 +32,10 @@ public class UFI extends Application {
     private final Button theme = new Button();
 
     private static final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
-    private static final ComboBox<Pair<String, Byte>> chooseForgeVersion = new ComboBox<>();
+    private static final ComboBox<Pair<String, Short>> chooseForgeVersion = new ComboBox<>();
 
     private static String minecraftVersion = "";
-    private static Pair<String, Byte> forgeVersion = new Pair<>("", (byte) -1);
+    private static Pair<String, Short> forgeVersion = new Pair<>("", (short) -1);
 
     private final Label mainLabel = new Label("Universal Forge Installer");
     private final Label minecraftVersionLabel = new Label("Minecraft version: ");
@@ -269,7 +269,7 @@ public class UFI extends Application {
     }
 
     private static void updateForgeVersions(boolean ignoreCache) throws IOException {
-        List<Pair<String, Byte>> assetClasses;
+        List<Pair<String, Short>> assetClasses;
 
 
         if (Universal.enableForgeCaching && !ignoreCache){
@@ -281,9 +281,9 @@ public class UFI extends Application {
         Platform.runLater(() -> {
             chooseForgeVersion.getItems().setAll(assetClasses);
             switch (Universal.defaultForgeVersion) {
-                case 0 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1))).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
-                case 1 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
-                case 2 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast())).findFirst().orElse(new Pair<>("Unknown", (byte) -1)));
+                case 0 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).get(1))).findFirst().orElse(new Pair<>("Unknown", (short) -1)));
+                case 1 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getFirst())).findFirst().orElse(new Pair<>("Unknown", (short) -1)));
+                case 2 -> chooseForgeVersion.setValue(assetClasses.stream().filter(pair -> pair.getKey().equals(Universal.minecraftToSpecifiedForgeVersions.get(minecraftVersion).getLast())).findFirst().orElse(new Pair<>("Unknown", (short) -1)));
             }
 
             if (minecraftVersion == null || minecraftVersion.replaceAll(" ", "").isEmpty()){
@@ -301,7 +301,7 @@ public class UFI extends Application {
 
             chooseForgeVersion.setCellFactory(_ -> new ListCell<>() {
                 @Override
-                protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                protected void updateItem(Pair<String, Short> item, boolean empty) {
                     super.updateItem(item, empty);
                     if (item == null || empty) {
                         setText(null);
@@ -313,7 +313,7 @@ public class UFI extends Application {
 
             chooseForgeVersion.setButtonCell(new ListCell<>() {
                 @Override
-                protected void updateItem(Pair<String, Byte> item, boolean empty) {
+                protected void updateItem(Pair<String, Short> item, boolean empty) {
                     super.updateItem(item, empty);
                     if (item == null || empty) {
                         setText(null);
@@ -331,17 +331,18 @@ public class UFI extends Application {
         List<String> versions = Installer.getMinecraftVersionsForForge();
         Platform.runLater(() -> updateStatusLabel((byte) 0));
 
+
         return versions;
     }
 
-    private static List<Pair<String, Byte>> getForgeVersions() throws IOException {
+    private static List<Pair<String, Short>> getForgeVersions() throws IOException {
         updateStatusLabel((byte) 4);
 
         List<String> output = Installer.getForgeVersionsForMinecraft(minecraftVersion);
-        List<Pair<String, Byte>> assetClasses = new ArrayList<>();
+        List<Pair<String, Short>> assetClasses = new ArrayList<>();
 
         for (String version : output) {
-            assetClasses.add(new Pair<>(version, (byte) output.indexOf(version)));
+            assetClasses.add(new Pair<>(version, (short) output.indexOf(version)));
         }
 
         return assetClasses;

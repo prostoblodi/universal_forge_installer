@@ -72,7 +72,7 @@ abstract class Installer implements Runnable {
     }
 
     // Download Forge
-    protected static void download_forge(String minecraftVersion, Pair<String, Byte> forgeVersionPair) throws IOException, URISyntaxException {
+    protected static void download_forge(String minecraftVersion, Pair<String, Short> forgeVersionPair) throws IOException, URISyntaxException {
         Path forgeJarsDir = Paths.get(System.getProperty("user.home"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
 
         String forgeVersion = forgeVersionPair.getKey();
@@ -88,10 +88,11 @@ abstract class Installer implements Runnable {
         }
 
         forgePageDocument = Jsoup.connect(String.format("https://files.minecraftforge.net/net/minecraftforge/forge/index_%s.html", minecraftVersion)).get();
+        forgePageDocument.select(".downloads").remove();
 
         String fileName;
 
-        if (howOldIndex == 2) {
+        if (howOldIndex >= 2) {
             fileName = String.format("Forge_%s_%s.jar", forgeVersion, minecraftVersion);
             downloadLinks = forgePageDocument.select("a:contains(Installer)");
         } else {

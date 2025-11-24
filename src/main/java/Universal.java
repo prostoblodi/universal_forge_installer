@@ -13,7 +13,7 @@ import java.util.*;
 
 public class Universal {
     protected static List<String> minecraftVersions = new ArrayList<>();
-    protected static final HashMap<String, List<Pair<String, Byte>>> minecraftToForgeVersions = new HashMap<>();
+    protected static final HashMap<String, List<Pair<String, Short>>> minecraftToForgeVersions = new HashMap<>();
     protected static final HashMap<String, List<String>> minecraftToSpecifiedForgeVersions = new HashMap<>();
 
     protected static byte defaultMinecraftVersion;
