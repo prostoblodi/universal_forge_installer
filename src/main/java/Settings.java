@@ -1,7 +1,12 @@
 import javafx.event.Event;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -71,7 +76,6 @@ class Settings {
     private final TextField timingsField = new TextField();
 
     private final Button customizerButton = new Button("Open customizer");
-    private final Button resetCacheButton = new Button("Reset cache");
     private final Button resetSettingsButton = new Button("Reset settings");
 
     private final Stage stage = new Stage();
@@ -124,7 +128,7 @@ class Settings {
                 enableTimings, customTimingsHBox,
                 Universal.createSeparator("Custom forge launch"), customForgeLaunchFullBox, folderFullBox,
                 Universal.createSeparator("Customize"), ButtonHBoxGenerator(customizerButton),
-                Universal.createSeparator("Reset"), ButtonHBoxGenerator(resetCacheButton), ButtonHBoxGenerator(resetSettingsButton)
+                Universal.createSeparator("Reset"), ButtonHBoxGenerator(resetSettingsButton)
         );
 
         windowLayout.getStyleClass().add("settings-vbox");
@@ -169,7 +173,7 @@ class Settings {
 
         minecraftFolderButton.setOnAction((_) -> {
             String s = String.valueOf(new DirectoryChooser().showDialog(new Stage()));
-            if (Objects.equals(s, "null")){s = "";}
+            if (Objects.equals(s, "null")){s = Universal.minecraftFolder;}
             minecraftFolderField.setText(s);
         });
 
@@ -341,24 +345,6 @@ class Settings {
         });
 
         customizerButton.setOnAction((_) -> new Customizer().show());
-        
-        resetCacheButton.setOnAction((_) -> {
-            if (Universal.cacheFile.delete()) {
-                System.out.println("@ Cache file at " + Universal.cachePath + " deleted(cache reset successfully)");
-                Universal.minecraftVersions.clear();
-                Universal.lastUsedMinecraftVersion = "";
-                Universal.minecraftToForgeVersions.clear();
-                Universal.minecraftToSpecifiedForgeVersions.clear();
-
-                try {
-                    UFI.showMinecraftVersions(true);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                System.out.println("@ Cache file at " + Universal.cachePath + " isn't deleted(cache reset failed)");
-            }
-        });
 
         resetSettingsButton.setOnAction((_) -> {
             if (Universal.settingsFile.delete()){
