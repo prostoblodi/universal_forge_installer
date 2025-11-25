@@ -68,6 +68,9 @@ public class UFI extends Application {
         down.setCenter(statusLabel);
         down.setRight(theme);
 
+        Universal.setToolTip(reload, "Reset versions cache");
+        Universal.setToolTip(theme, Universal.isDarkMode ? "Change theme to light" : "Change theme to dark");
+
         VBox vbox = new VBox(mainLabel, gp, downloadButton, settingsButton, down);
 
         scene = new Scene(vbox);
@@ -331,7 +334,6 @@ public class UFI extends Application {
         List<String> versions = Installer.getMinecraftVersionsForForge();
         Platform.runLater(() -> updateStatusLabel((byte) 0));
 
-
         return versions;
     }
 
@@ -589,11 +591,8 @@ public class UFI extends Application {
 
             scene.getStylesheets().clear();
 
-            if (Universal.isDarkMode) {
-                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-dark.css")).toExternalForm());
-            } else {
-                scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("styles-light.css")).toExternalForm());
-            }
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource(Universal.isDarkMode ? "styles-dark.css" : "styles-light.css")).toExternalForm());
+            Universal.setToolTip(theme, Universal.isDarkMode ? "Change theme to light" : "Change theme to dark");
         }
     }
 
