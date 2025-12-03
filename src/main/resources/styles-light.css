@@ -96,7 +96,7 @@
     -fx-pref-height: 44; /* Preferred height */
 }
 
-/* Buttons hover style */
+/* Buttons hover style s */
 .button:hover {
     -fx-background-color: #d0d0d0; /* Hover button colour */
 }
