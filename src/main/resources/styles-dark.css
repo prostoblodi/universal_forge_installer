@@ -84,6 +84,18 @@
     -fx-pref-height: 44; /* Preferred height */
 }
 
+.bin-button {
+    -fx-background-image: url("bin-dark.png");
+    -fx-background-size: 25px 25px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-alignment: center;
+    -fx-background-color: #383838;
+    -fx-background-radius: 4px;
+    -fx-pref-width: 44; /* Preferred width */
+    -fx-pref-height: 44; /* Preferred height */
+}
+
 /* Hovered button */
 .button:hover {
     -fx-background-color: #4a4a4a; /* Slightly lighter on hover */

@@ -32,6 +32,7 @@ public class UFI extends Application {
 
     private static final Button reload = new Button();
     private final Button theme = new Button();
+    private final Button resetFiles = new Button();
 
     private static final ComboBox<String> chooseMinecraftVersion = new ComboBox<>();
     private static final ComboBox<Pair<String, Short>> chooseForgeVersion = new ComboBox<>();
@@ -69,9 +70,11 @@ public class UFI extends Application {
         BorderPane.setMargin(statusLabel, new Insets(0, 0, 0, 40));
         down.setCenter(statusLabel);
         down.setRight(theme);
+        down.setLeft(resetFiles);
 
         Universal.setToolTip(reload, "Reset versions cache");
         Universal.setToolTip(theme, Universal.isDarkMode ? "Change theme to light" : "Change theme to dark");
+        Universal.setToolTip(resetFiles, "Delete forge files");
 
         VBox vbox = new VBox(mainLabel, gp, downloadButton, settingsButton, down);
 
@@ -137,6 +140,7 @@ public class UFI extends Application {
         statusLabel.getStyleClass().add("status-label");
         reload.getStyleClass().add("reload-button");
         theme.getStyleClass().add("theme-button");
+        resetFiles.getStyleClass().add("bin-button");
     }
 
     private void setActions() {
@@ -232,6 +236,14 @@ public class UFI extends Application {
 
             updateThemes(scene, Settings.scene, Customizer.scene);
         });
+
+        resetFiles.setOnAction((_) -> new Thread(() -> {
+            try {
+                Files.delete(Universal.forgeJarsDir);
+            } catch (IOException e) {
+                updateStatusLabel((byte) 5);
+            }
+        }).start());
     }
 
     private static void saveMinecraftVersion(boolean ignoreCache) throws IOException {

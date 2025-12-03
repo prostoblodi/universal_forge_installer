@@ -73,7 +73,7 @@ abstract class Installer implements Runnable {
 
     // Download Forge
     protected static void download_forge(String minecraftVersion, Pair<String, Short> forgeVersionPair) throws IOException, URISyntaxException {
-        Path forgeJarsDir = Paths.get(System.getProperty("user.home"), "UFI", "ForgeJars", String.valueOf(minecraftVersion));
+        Path lForgeJarsDir = Paths.get(String.valueOf(Universal.forgeJarsDir), minecraftVersion);
 
         String forgeVersion = forgeVersionPair.getKey();
 
@@ -81,8 +81,8 @@ abstract class Installer implements Runnable {
 
         byte howOldIndex = Universal.howOldIndex(minecraftVersion);
 
-        if (!forgeJarsDir.toFile().exists()) {
-            if (forgeJarsDir.toFile().mkdirs()) {
+        if (!lForgeJarsDir.toFile().exists()) {
+            if (lForgeJarsDir.toFile().mkdirs()) {
                 System.out.println("The ForgeJars folder is successfully created.");
             }
         }
@@ -101,7 +101,7 @@ abstract class Installer implements Runnable {
             fileName = String.format("Forge_%s_%s.zip", forgeVersion, minecraftVersion);
         }
 
-        filePath = forgeJarsDir.resolve(fileName).toAbsolutePath();
+        filePath = lForgeJarsDir.resolve(fileName).toAbsolutePath();
         if (!filePath.toFile().exists()) {
             Element hasDownloadLink = downloadLinks.get(forgeVersionPair.getValue());
             URL url = new URI(hasDownloadLink.attr("href").split("&url=")[1]).toURL();
