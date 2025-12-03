@@ -12,6 +12,7 @@ import javafx.scene.layout.Region;
 import javafx.util.Pair;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ public class Universal {
 
     protected static boolean extendCustomizer;
 
+    protected static Path forgeJarsDir = Paths.get(System.getProperty("user.home"), "UFI", "ForgeJars");
     protected static String settingsPath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.settings"));
     protected static String cachePath = String.valueOf(Paths.get(System.getProperty("user.home"), "UFI", "UFI.cache"));
 
