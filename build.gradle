@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
@@ -18,6 +19,11 @@ dependencies {
 
 application {
     mainClass = 'Main'
+}
+
+javafx {
+    version = '24'
+    modules = ['javafx.controls', 'javafx.graphics']
 }
 
 tasks.withType(JavaExec).configureEach {
