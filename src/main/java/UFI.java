@@ -18,9 +18,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,8 +143,7 @@ public class UFI extends Application {
     }
 
     private void setActions() {
-        chooseMinecraftVersion.setOnAction(
-                (_) -> new Thread(() -> {
+        chooseMinecraftVersion.setOnAction((_) -> new Thread(() -> {
                     try {
                         saveMinecraftVersion(false);
                         Platform.runLater(() -> updateStatusLabel((byte) 0));
@@ -153,15 +151,11 @@ public class UFI extends Application {
                         UFI.updateStatusLabel((byte) 5);
                         throw new RuntimeException(e);
                     }
-                }).start()
-        );
+                }).start());
 
-        chooseForgeVersion.setOnAction(
-                (_) -> saveForgeVersion()
-        );
+        chooseForgeVersion.setOnAction((_) -> saveForgeVersion());
 
-        downloadButton.setOnAction(
-                (_) -> {
+        downloadButton.setOnAction((_) -> {
                     if (!minecraftVersion.isEmpty() && !forgeVersion.getKey().isEmpty()) {
                         updateStatusLabel((byte) 1); // downloading
                         new Thread(() -> {
@@ -239,9 +233,28 @@ public class UFI extends Application {
 
         resetFiles.setOnAction((_) -> new Thread(() -> {
             try {
-                Files.delete(Universal.forgeJarsDir);
-            } catch (IOException e) {
-                updateStatusLabel((byte) 5);
+                Files.walkFileTree(Universal.forgeJarsDir, new SimpleFileVisitor<>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                        Files.delete(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+                        if (e == null) {
+                            Files.delete(dir);
+                            return FileVisitResult.CONTINUE;
+                        } else {
+                            throw e;
+                        }
+                    }
+                });
+            }
+            catch (NoSuchFileException e) {
+                System.out.println("nothing to delete");
+            }
+            catch (IOException e){
+                updateStatusLabel((byte) 5); // error
             }
         }).start());
     }
