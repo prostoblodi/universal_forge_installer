@@ -66,7 +66,7 @@ public class UFI extends Application {
         statusLabel.setAlignment(Pos.CENTER);
 
         BorderPane down = new BorderPane();
-        BorderPane.setMargin(statusLabel, new Insets(0, 0, 0, 40));
+        BorderPane.setMargin(statusLabel, new Insets(0, 40, 0, 40));
         down.setCenter(statusLabel);
         down.setRight(theme);
         down.setLeft(resetFiles);
